@@ -1,4 +1,4 @@
-# OSC互动音乐: 实时数据MIDI合成器映射
+# OSC互动音乐: 实时数据映射 MIDI 合成器
 
 [ENGLISH VERSION](./README_EN.md)
 
