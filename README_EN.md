@@ -8,6 +8,7 @@ This Demo uses macOS as an example to demonstrate how to transfer camera data, m
 
 ---
 
+
 ## 2 Core Features
 
 - **Real-Time Data Collection**:
@@ -26,6 +27,7 @@ This Demo uses macOS as an example to demonstrate how to transfer camera data, m
 
 ---
 
+
 ## 3 Tech Stack
 
 - **Python**: Use libraries like OpenCV or Pynput for flexible data reception or acquisition, process the logic, map the data to music parameter ranges, and convert it into OSC-compatible signals for transmission to the DAW via a specified path and port.
@@ -35,6 +37,7 @@ This Demo uses macOS as an example to demonstrate how to transfer camera data, m
 - **Ableton Live (personal choice)**: Receive OSC signals and map them to MIDI synthesizer parameters via Max for Live plugins, converting them into final musical effects.
 
 ---
+
 
 ## 4 Demo 1: Camera and Mouse Data
 
@@ -65,7 +68,7 @@ This Demo uses macOS as an example to demonstrate how to transfer camera data, m
   `numpy`: Used for efficient mathematical calculations, such as calculating average brightness and frame differences.
   `time`: Controls the time logic of the script, such as frame rate and delays.
 
-- **Sample Code: `Receive_Camera_Data.py`**
+- **Sample Code**: [Receive_Camera_Data.py](./osc_midi_scripts/Receive_Camera_Data.py) 
 
 ```python
 import cv2
@@ -146,7 +149,7 @@ finally:
   - **Mouse Movement**: Mapping range is [0, 127], corresponding to MIDI Note pitch values. This range is chosen to align with the standard MIDI note range, where lower coordinate values map to lower pitches and higher values map to higher pitches. Path: `/mouse_position`.
   - **Mouse Clicks**: Mapping range is [0, 127], corresponding to MIDI Velocity (volume intensity). This range is chosen to control the dynamic performance of notes, generating rich melodies in combination with the X-coordinate. Path: `/trigger_event`.
 
-- **Sample Code: `mouse_interaction.py`**
+- **Sample Code**: [Mouse_Interaction.py](./osc_midi_scripts/Mouse_Interaction.py)
 
 ```python
 from pynput import mouse
@@ -201,7 +204,9 @@ Through the above steps, Ableton Live can receive and process OSC signals in rea
 
 ---
 
+
 ## 5 Demo 2: Health Data
+
 
 ### 5.1 Health Data Bridging:
 
@@ -234,7 +239,7 @@ Through the above steps, Ableton Live can receive and process OSC signals in rea
   - **Tips:**
     Ensure that the IP address (oscHost) set in `HealthKitManager` matches your Mac’s actual local network IP address rather than the local loopback `127.0.0.1`, as this would point to the iPhone itself.
 
-  - **Sample Code: `HealthKitManager_CaloriesBurned.swift`**
+  - **Sample Code**: [HealthKitManager_CaloriesBurned.swift](./health_data_bridge/HealthKitManager_CaloriesBurned.swift)
 
 ```swift
 import Foundation
@@ -297,7 +302,7 @@ class HealthKitManager: ObservableObject {
 ```
 
 - **`ContentView.swift`**: Provides a real-time UI to display calorie data and trigger HealthKit authorization.
-- **Sample Code: `ContentView_CaloriesBurned.swift`**
+- **Sample Code**: [ContentView_CaloriesBurned.swift](./health_data_bridge/ContentView_CaloriesBurned.swift)
 
 ```swift
 import SwiftUI
@@ -325,6 +330,9 @@ struct ContentView: View {
     }
 }
 ```
+
+
+
 
 ### **5.2 Python Data Reception, OSC Transmission, and Mapping**
 
