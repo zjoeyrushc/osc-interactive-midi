@@ -38,6 +38,7 @@ pip install python-osc
 pip install pynput
 ```
 
+
 - **HealthKit + Xcode（非必须）**: 用 Xcode 构建桥接应用，通过 HealthKit 组件获取 AppleWatch 的运动数据，并把数据发送到 Python 的接收地址上，提供额外的数据驱动方式。
 
   - **安装 Xcode**：在 macOS 上通过 App Store 搜索并安装 Xcode。
@@ -45,6 +46,7 @@ pip install pynput
   - **启用 HealthKit**：打开项目，在 Capabilities 中启用 HealthKit。
 
   - **运行应用**：连接 iPhone（确保打开开发者模式），选择设备并点击 Run 按钮部署应用。
+
 
 - **Ableton Live（个人选择）**: 接收 OSC 信号，通过 Max For Live 插件将数据映射到 MIDI 合成器参数，转化为最终音乐效果。
 
