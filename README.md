@@ -142,7 +142,7 @@ finally:
   - **鼠标移动**：映射范围为 [0, 127]，对应 MIDI Note 的音高值。此范围选取是为了贴合 MIDI 标准音符区间，低坐标值映射低音，高坐标值映射高音，路径：`/mouse_position`。
   - **鼠标点击**：映射范围为 [0, 127]，对应 MIDI Velocity（音量强度）。选择该区间是为了控制音符动态表现，与 X 坐标结合生成丰富的旋律，路径：`/trigger_event`。
 
-- **示例代码：[Mouse_Position.py](./osc_midi_scripts/Mouse_Interaction.py)
+- **示例代码：[Mouse_Interaction.py](./osc_midi_scripts/Mouse_Interaction.py)
 
 ```python
 from pynput import mouse
@@ -225,7 +225,7 @@ with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
    - **Tips：**
     确保你在 HealthKitManager 中设置的 IP 地址 (oscHost) 为你 Mac 的实际局域网 IP 地址，而不是本地回路 127.0.0.1，因为这会指向 iPhone 自身。
 
-   - **示例代码：`/HealthKitManager_CaloriesBurned.swift`**
+   - **示例代码**：[HealthKitManager_CaloriesBurned.swift](./health_data_bridge/HealthKitManager_CaloriesBurned.swift)
 ```swift
 import Foundation
 import HealthKit
@@ -287,7 +287,7 @@ class HealthKitManager: ObservableObject {
 ```
 
   - **`ContentView.swift`**: 提供实时 UI，显示卡路里数据并触发 HealthKit 授权。
-   - **示例代码：[ContentView_CaloriesBurned.swift](./ContentView_CaloriesBurned.swift)
+   - **示例代码**：[ContentView_CaloriesBurned.swift](./health_data_bridge/ContentView_CaloriesBurned.swift)
 
 ```swift
 import SwiftUI
