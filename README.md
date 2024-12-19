@@ -27,10 +27,10 @@
 ---
 
 
-## 3 技术栈
+## 3 技术栈与依赖安装
 
 - **Python**: 用 OpenCV 或 Pynput 等方式灵活接收或采集数据，完成逻辑处理，将数据映射到音乐参数值区间，转化为符合 OSC 格式的信号，通过指定路径和端口传输至 DAW 中进行生成。
-  执行以下命令安装本次 Python 依赖
+  - **准备**：执行以下命令安装本次的 Python 依赖。
 ```python
 pip install opencv-python
 pip install python-osc
@@ -38,9 +38,19 @@ pip install pynput
 ```
 
 - **HealthKit + Xcode（非必须）**: 用 Xcode 构建桥接应用，通过 HealthKit 组件获取 AppleWatch 的运动数据，并把数据发送到 Python 的接收地址上，提供额外的数据驱动方式。
+  - **安装 Xcode**：在 macOS 上通过 App Store 搜索并安装 Xcode。
+  - **启用 HealthKit**：打开项目，在 Capabilities 中启用 HealthKit。
+  - **运行应用**：连接 iPhone（确保打开开发者模式），选择设备并点击 Run 按钮部署应用。
 
 - **Ableton Live（个人选择）**: 接收 OSC 信号，通过 Max For Live 插件将数据映射到 MIDI 合成器参数，转化为最终音乐效果。
-
+  - **安装 Ableton Live**：从 [Ableton 官网](https://www.ableton.com/) 下载并安装 Ableton Live 11（建议使用 Suite 版本，包含 Max for Live 功能）。
+  - **启用 Max for Live**：在 **Preferences > Licenses/Maintenance** 中确保 **Max for Live** 已启用。Max for Live 是 Ableton 的扩展工具，可用于自定义接收 OSC 数据和生成 MIDI 音乐。
+  - **加载 Max for Live 插件**： 
+   以下是一些示例插件，可以帮助你快速实现 OSC 数据接收和转换：
+   - [**OSC Receiver (OSC In)**](https://maxforlive.com/library/device/7752/osc-receiver-osc-in)：一个简单的 OSC 数据接收插件，用于监听指定端口的 OSC 消息。
+   - [**Simple OSC to MIDI**](https://maxforlive.com/library/device/987/simple-osc-to-midi)：将接收的 OSC 数据映射为 MIDI 音符或参数，用于实时音乐生成。
+   - [**Connection Kit**](https://github.com/Ableton/m4l-connection-kit)：Ableton 官方发布的工具包，包含多个 OSC 和 MIDI 工具，不仅支持数据接收，还可以连接传感器、控制器等多种设备，拓展更多互动应用场景。
+   
 ---
 
 
