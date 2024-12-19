@@ -36,14 +36,12 @@
 
 ### **4.1 Python 数据抓取与OSC 传输：**
 
-- 涉及组件：
-
+- **涉及组件：**
   pythonosc.udp\_client：实现 OSC 消息的发送，将处理后数据传输至 Ableton。
 
 - 涉及使用 PythonOSC 建立 UDP 通信，将数据实时传输至 Ableton Live。
 
-- 网络配置：
-
+- **网络配置：**
   - 本地 IP 地址：127.0.0.1（本地设备通信）。
   - UDP 端口：9000（确保 Ableton 监听相同端口）。
 
@@ -52,20 +50,16 @@
 - 通过 OpenCV 捕捉画面亮度、颜色偏移和运动量，用于生成动态音乐，**映射关系可按照合成器的目标参数自定义设计**。
 
 - **数据映射及区间：**
-
   - **画面亮度**：映射范围为 [0, 10]，对应 MIDI Program Change 的和弦选择。选择 0-10 的范围是因为此值反映了和弦种类的切换，对应不同音乐情绪的切换。路径：`/brightness`。
   - **颜色偏移**：映射范围为 [-1, 1]，对应滤波器参数变化，用于调整声音的音色特性。此区间直接反映色彩差异强弱，并产生独特的声音纹理。路径：`/color_shift`。
   - **运动量**：映射范围为 [0, 127]，用于触发打击乐的节奏强度（MIDI Velocity）。此区间对应 MIDI 标准的打击力度，能有效控制节奏表现力。路径：`/motion_intensity`。
 
 - **涉及组件：**
-
   `cv2`：用于捕获视频画面和图像处理，例如计算亮度、检测运动量等。
-
   `numpy`：用于高效的数学计算，例如计算平均亮度和帧差异。
-
   `time`：控制脚本运行的时间逻辑，如帧率和延迟。
 
-- **示例代码：**
+- **示例代码：`/Receive_Camera_Data.py`**
 
 ```python
 import cv2
@@ -134,24 +128,19 @@ finally:
 
 ```
 
-
-
 ### **4.3 鼠标数据映射：**
 
 - 捕获鼠标位置与点击，用于动态生成旋律和音量控制。
 
 - **涉及组件：**
-
   `pynput.mouse`：用于监听鼠标的移动和点击事件，将鼠标位置和动作映射到音乐参数，如音高和力度。
-
   `random`：随机生成数据，例如鼠标点击时生成随机的MIDI力度，增加音乐表现力和多样性。
 
 - **数据映射及区间：**
-
   - **鼠标移动**：映射范围为 [0, 127]，对应 MIDI Note 的音高值。此范围选取是为了贴合 MIDI 标准音符区间，低坐标值映射低音，高坐标值映射高音，路径：`/mouse_position`。
   - **鼠标点击**：映射范围为 [0, 127]，对应 MIDI Velocity（音量强度）。选择该区间是为了控制音符动态表现，与 X 坐标结合生成丰富的旋律，路径：`/trigger_event`。
 
-示例代码：
+- **示例代码：`/mouse_interaction.py`**
 
 ```python
 from pynput import mouse
@@ -189,65 +178,52 @@ with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
     listener.join()
 ```
 
-
-
-### **Ableton Live MIDI生成：**
+### **4.4 Ableton Live MIDI生成：**
 
 - **OSC接收与配置：** 使用 Max for Live 的 OSC Receiver 插件设置监听地址和端口，将 Python 发送的数据接入 Ableton。
 
 - **OSC到MIDI的插件**： 使用 Max for Live 中的自定义 MIDI Effect 插件，将 OSC 参数直接转换为 MIDI Note 或其他动态参数值。例如：
-
   根据 OSC 数据范围 [0, 127]，生成 MIDI Note 并限制在指定音阶内（如 C 大调）。
+  可利用Midi Effects的各种功能完善音乐性，如用 Scale 功能确保音符符合音乐调性。
 
-  利用插件的 Scale 功能确保音符符合音乐调性。
-
-- **参数映射：** 利用 Ableton 的 Map 功能，将 OSC 参数映射到目标 MIDI 控制器。例如：
-
-  - **画面亮度**映射至合成器滤波器频率（路径：`/brightness`）。
-  - **鼠标X坐标**映射至 MIDI 音符值（路径：`/mouse/x`）。
+- **合成器参数映射：** 在确保了音符生成后，可利用 Ableton 的 Map 功能，将其他 OSC 参数映射到目标 MIDI 音符参数或合成器参数上。例如：
+  - **画面亮度**映射至 MIDI 合成器滤波器频率（路径：`/brightness`）。
+  - **鼠标点击**映射至 MIDI 音符强度（路径：`/trigger_event`）。
 
 通过以上步骤，Ableton Live 能够接收和实时处理 OSC 信号，将多源数据转化为丰富的音乐表现形式。
 
 ---
 
-## Demo 2：健康数据
+## 5 Demo 2：健康数据
 
-### 健康数据桥接：
+### 5.1 健康数据桥接：
 
 - **Xcode App 开发：**
-
   - 下载并安装 Xcode，创建一个新的 iOS 项目，选择 SwiftUI 作为界面构建工具。
   - 在项目设置中启用 HealthKit 框架，确保添加所需权限。通过创建一个`HealthKitManager.swift` 文件完成对卡路里数据的获取。
   - 授权用户读取健康数据，确保隐私合规性。
-  - 在原始的 `ContentView.swift` 中构建前端界面，显示实时卡路里消耗并触发授权逻辑。
+  - 在原始的 `ContentView.swift` 中构建前端界面，显示实时运动数据并触发授权逻辑。
   - 将 iPhone 使用数据线连接到 Mac，在 iPhone 上按照提示信任计算机，并在“设置 > 隐私与安全 > 开发者模式”中启用开发者模式。
-
     打开 Xcode，点击顶部菜单中的“设备和模拟器”（Device and Simulators），确保 iPhone 已正确连接并显示在设备列表中，依据提示完成配置。
-
     在 Xcode 的目标设备菜单中选择 iPhone，点击“运行”（Run）按钮，将应用部署到 iPhone 进行测试。
   - 运行后就可过 UDP 协议将卡路里数据发送至计划的 Python 模块以供后续处理。
 
 - **在 Info.plist 中正确配置 HealthKit 权限**
-
-在开发使用 HealthKit 的应用时，需提前在 **Info.plist** 文件中声明权限，否则无法成功请求用户的 HealthKit 数据。
   - **找到 Info.plist 文件**：
    - 打开 Xcode，在左侧的 **Project Navigator** 中选择你的项目名称。
    - 选择 **TARGETS** > 你的应用 Target（例如 `HealthKitCyclingApp`）。
    - 点击顶部的 **Info** 标签。
-
   - **添加必要的权限描述**：
-     在 **Custom iOS Target Properties** 下，手动添加以下两项：
-     - `NSHealthShareUsageDescription`  
-       **值**: 该应用需要访问您的健康数据，以显示骑行和心率信息。
-     - `NSHealthUpdateUsageDescription`  
-       **值**: 该应用需要访问权限以更新您的健康数据。
+   在 **Custom iOS Target Properties** 下，手动添加以下两项：
+   - `NSHealthShareUsageDescription`  **值**: 该应用需要访问您的健康数据，以显示健康数据信息。
+   - `NSHealthUpdateUsageDescription`  **值**: 该应用需要访问权限以更新您的健康数据。
 
 - **核心功能文件：**
-
-  - `HealthKitManager.swift`: 负责通过 HealthKit 框架获取卡路里数据，并通过 UDP 将数据发送至 Python 接收端。UDP 的 IP 地址设置为Mac的IP地址（`192.168.1.142` 为我 Mac 的地址），确保 iPhone 和 Mac 处于同一网络环境。以下为核心实例：
-  - Tips：
+  - **`HealthKitManager.swift`**: 负责通过 HealthKit 框架获取卡路里或心率数据，并通过 UDP 将数据发送至 Python 接收端。UDP 的 IP 地址设置为Mac的IP地址（`192.168.1.142` 为我 Mac 的地址），确保 iPhone 和 Mac 处于同一网络环境。以下为核心实例：
+   - **Tips：**
     确保你在 HealthKitManager 中设置的 IP 地址 (oscHost) 为你 Mac 的实际局域网 IP 地址，而不是本地回路 127.0.0.1，因为这会指向 iPhone 自身。
 
+   - **示例代码：`/HealthKitManager_CaloriesBurned.swift`**
 ```swift
 import Foundation
 import HealthKit
@@ -308,7 +284,8 @@ class HealthKitManager: ObservableObject {
 }
 ```
 
-  - `ContentView.swift`: 提供实时 UI，显示卡路里数据并触发 HealthKit 授权。
+  - **`ContentView.swift`**: 提供实时 UI，显示卡路里数据并触发 HealthKit 授权。
+   - **示例代码：`/ContentView_CaloriesBurned.swift`**
 
 ```swift
 import SwiftUI
@@ -337,58 +314,38 @@ struct ContentView: View {
 }
 ```
 
+### **5.2 Python 数据接收、OSC传输与映射**
 
+- **数据接收**
+  - **方式：** Python 使用 Socket 模块搭建 UDP 服务器，监听端口 8000，接收来自 Swift 端的卡路里数据。
+  - **消息格式：** Swift 端通过 OSC 协议发送消息，格式为 /counter,\<calories>，Python 解析后提取卡路里值。
+  - **涉及组件：** 
+    `socket`：用于接收健康数据，通过 UDP 协议建立服务器监听数据流。
 
-### **Python 数据接收、OSC传输与映射**
+- **数据传输**
+  - 通过 PythonOSC 将接收的数据以同样的 OSC 协议转发到指定的目标端口（默认示例为 Ableton Live 的 9000 端口，OSC 路径为 /counter），为Midi映射建立前置条件。
+  - **目标地址：** 默认使用 本地回路地址 (127.0.0.1)，但可以根据需求自由定义为任何目标地址，实现跨设备或网络的传输。
+  - **涉及组件：**
+    `threading`：用于创建独立线程，以并行方式发送 MIDI 音符数据，不阻塞主程序运行。
+    `pythonosc.udp\_client`：实现 OSC 消息的发送，将映射后的健康数据传输至目标设备或软件（如 Ableton Live）。
 
-**数据接收**
+- **数据映射：**
+  - **涉及组件：**
+    `time`：控制数据发送频率，例如为 MIDI 数据生成指定的播放间隔。
+    `random`：生成随机 MIDI 音符，从和弦中随机挑选避免重复音符。
+     **更多卡路里消耗对应更高的音符，同时音符播放越密集，反映运动的动态变化。**
 
-方式：Python 使用 Socket 模块搭建 UDP 服务器，监听端口 8000，接收来自 Swift 端的卡路里数据。
+  - **卡路里到 MIDI 音符的映射：**
+   - 卡路里范围：[0, 5] kcal。
+   - MIDI 音符范围：[21 (A0), 108 (C8)]。
+   - 映射公式：`midi_note = int(21 + (calories / 5) * (108 - 21))`。
 
-消息格式：Swift 端通过 OSC 协议发送消息，格式为 /counter,\<calories>，Python 解析后提取卡路里值。
+  - **时间间隔映射：**
+   - 卡路里范围：[0, 50] kcal。
+   - 时间间隔范围：[0.1, 1.0] 秒。
+   - 映射公式：`interval = max(0.1, 0.5 / calories)`。
 
-涉及组件：\
-socket：用于接收健康数据，通过 UDP 协议建立服务器监听数据流。
-
-
-
-**数据传输**
-
-通过 PythonOSC 将接收的数据以同样的 OSC 协议转发到指定的目标端口（默认示例为 Ableton Live 的 9000 端口，OSC 路径为 /counter），为Midi映射建立前置条件。
-
-目标地址：默认使用 本地回路地址 (127.0.0.1)，但可以根据需求自由定义为任何目标地址，实现跨设备或网络的传输。
-
-涉及组件：\
-threading：用于创建独立线程，以并行方式发送 MIDI 音符数据，不阻塞主程序运行。
-
-pythonosc.udp\_client：实现 OSC 消息的发送，将映射后的健康数据传输至目标设备或软件（如 Ableton Live）。\
-
-
-**数据映射：**\
-涉及组件：
-
-time：控制数据发送频率，例如为 MIDI 数据生成指定的播放间隔。
-
-random：生成随机 MIDI 音符，从和弦中随机挑选避免重复音符。\
-\
-**更多卡路里消耗对应更高的音符，同时音符播放越密集，反映运动的动态变化。**
-
-- **卡路里到 MIDI 音符的映射：**
-
-  - 卡路里范围：[0, 5] kcal。
-  - MIDI 音符范围：[21 (A0), 108 (C8)]。
-  - 映射公式：`midi_note = int(21 + (calories / 5) * (108 - 21))`。
-
-
-
-- **时间间隔映射：**
-
-  - 卡路里范围：[0, 50] kcal。
-  - 时间间隔范围：[0.1, 1.0] 秒。
-  - 映射公式：`interval = max(0.1, 0.5 / calories)`。
-
-
-
+- **示例代码：`Receive_Calories_Burned.py`**
 ```python
 import socket
 import threading
@@ -485,5 +442,4 @@ except KeyboardInterrupt:
 
 ```
 
-\
-通过Ableton Live的OSC功能，这些数据可以轻松映射到MIDI参数中。更多细节可参考项目1的操作。基于心跳频率和卡路里消耗的动态数据映射，音乐不仅实现了对个人状态的响应，也让旋律表现出独特的节奏感和情绪变化。每一次的身体数据驱动，都仿佛在为个人创作一部专属的实时乐章。
+通过Ableton Live的OSC功能，这些数据可以轻松映射到MIDI参数中。更多细节可参考 Demo 1的操作。基于心跳频率和卡路里消耗的动态数据映射，音乐不仅实现了对个人状态的响应，也让旋律表现出独特的节奏感和情绪变化。每一次的身体数据驱动，都仿佛在为个人创作一部专属的实时乐章。
