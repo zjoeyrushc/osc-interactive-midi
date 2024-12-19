@@ -283,9 +283,9 @@ class HealthKitManager: ObservableObject {
     let healthStore = HKHealthStore()
     @Published var latestCaloriesBurned: Double = 0.0
 
-    private var connection: NWConnection?
-    private let oscHost = "192.168.1.142" # Please replace with your local machine's IP address. 
-    private let oscPort: UInt16 = 8000 # Please replace with your target port. 
+   private var connection: NWConnection?
+   private let oscHost = "192.168.1.142" // Please replace with your local machine's IP address.
+   private let oscPort: UInt16 = 8000    // Please replace with your target port.
 
     init() {
         setupConnection()
