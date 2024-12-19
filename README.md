@@ -161,34 +161,139 @@ with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
 
 ---
 
-## 项目 2：健康数据
+## 项目 2：健康数据 | Project 2: Health Data
 
-### 健康数据桥接
+### 健康数据桥接 | Health Data Bridging
 
-#### 核心功能文件
+- **Xcode App 开发 | Xcode App Development:**
 
-1. **HealthKitManager.swift**: 负责通过 HealthKit 框架获取卡路里数据，并通过 UDP 将数据发送至 Python 接收端。
+  - 下载并安装 Xcode，创建一个新的 iOS 项目，选择 SwiftUI 作为界面构建工具。
+    Download and install Xcode, create a new iOS project, and select SwiftUI as the interface framework.
 
-2. **ContentView.swift**: 提供实时 UI，显示卡路里数据并触发 HealthKit 授权。
+  - 在项目设置中启用 HealthKit 框架，确保添加所需权限。通过创建一个`HealthKitManager.swift` 文件完成对卡路里数据的获取。
+    Enable the HealthKit framework in project settings and ensure required permissions are added. Use a `HealthKitManager.swift` file to retrieve calorie data.
 
----
+  - 授权用户读取健康数据，确保隐私合规性。
+    Authorize user access to health data while ensuring privacy compliance.
 
-### Python 数据接收、OSC传输与映射
+  - 在原始的 `ContentView.swift` 中构建前端界面，显示实时卡路里消耗并触发授权逻辑。
+    Build a frontend interface in the original `ContentView.swift` to display real-time calorie consumption and trigger authorization logic.
 
-#### 示例代码
-```python
-import socket
-import threading
-from pythonosc.udp_client import SimpleUDPClient
-import time
-import random
+  - 将 iPhone 使用数据线连接到 Mac，在 iPhone 上按照提示信任计算机，并在“设置 > 隐私与安全 > 开发者模式”中启用开发者模式。
+    Connect the iPhone to the Mac via a data cable, trust the computer on the iPhone, and enable Developer Mode under "Settings > Privacy & Security."
 
-# 设置接收卡路里数据的 Socket
-receive_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-receive_sock.bind(("0.0.0.0", 8000))
+    打开 Xcode，点击顶部菜单中的“设备和模拟器”（Device and Simulators），确保 iPhone 已正确连接并显示在设备列表中，依据提示完成配置。
+    Open Xcode, click "Devices and Simulators" in the top menu, and ensure the iPhone is connected and displayed in the device list. Follow the prompts to complete the configuration.
 
-# Ableton 的 OSC 客户端
-ABLETON_IP = "127.0.0.1"
+    在 Xcode 的目标设备菜单中选择 iPhone，点击“运行”（Run）按钮，将应用部署到 iPhone 进行测试。
+    Select the iPhone in Xcode's target device menu, click "Run," and deploy the app to the iPhone for testing.
+
+  - 运行后就可过 UDP 协议将卡路里数据发送至计划的 Python 模块以供后续处理。
+    Once running, calorie data can be sent over UDP to a designated Python module for further processing.
+
+
+
+- **核心功能文件 | Core Functional Files:**
+
+  - `HealthKitManager.swift`: 负责通过 HealthKit 框架获取卡路里数据，并通过 UDP 将数据发送至 Python 接收端。UDP 的 IP 地址设置为Mac的IP地址（`192.168.1.142` 为我 Mac 的地址），确保 iPhone 和 Mac 处于同一网络环境。
+    Responsible for retrieving calorie data via the HealthKit framework and sending it to the Python receiver through UDP. The UDP IP address is set to the Mac's IP address (`192.168.1.142` in my case), ensuring both the iPhone and Mac are on the same network.
+
+  - **Tips:**
+    确保你在 HealthKitManager 中设置的 IP 地址 (oscHost) 为你 Mac 的实际局域网 IP 地址，而不是本地回路 127.0.0.1，因为这会指向 iPhone 自身。
+    Ensure that the IP address (oscHost) set in HealthKitManager is the actual LAN IP address of your Mac, not the local loopback 127.0.0.1, as that will point to the iPhone itself.
+
+```swift
+import Foundation
+import HealthKit
+import Network
+
+class HealthKitManager: ObservableObject {
+    let healthStore = HKHealthStore()
+    @Published var latestCaloriesBurned: Double = 0.0
+
+    private var connection: NWConnection?
+    private let oscHost = "192.168.1.142"
+    private let oscPort: UInt16 = 8000
+
+    init() {
+        setupConnection()
+    }
+
+    func setupConnection() {
+        connection = NWConnection(host: NWEndpoint.Host(oscHost), port: NWEndpoint.Port(rawValue: oscPort)!, using: .udp)
+        connection?.start(queue: .main)
+    }
+
+    func requestAuthorization() {
+        guard HKHealthStore.isHealthDataAvailable() else { return }
+        let energyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
+        healthStore.requestAuthorization(toShare: nil, read: [energyType]) { success, _ in
+            if success {
+                self.startCaloriesQuery()
+            }
+        }
+    }
+
+    func startCaloriesQuery() {
+        let energyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
+        let query = HKObserverQuery(sampleType: energyType, predicate: nil) { _, _, _ in
+            self.fetchLatestCaloriesBurned()
+        }
+        healthStore.execute(query)
+    }
+
+    func fetchLatestCaloriesBurned() {
+        let energyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
+        let query = HKSampleQuery(sampleType: energyType, predicate: nil, limit: 1, sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)]) { _, results, _ in
+            guard let sample = results?.first as? HKQuantitySample else { return }
+            DispatchQueue.main.async {
+                self.latestCaloriesBurned = sample.quantity.doubleValue(for: .kilocalorie())
+                self.sendCaloriesToOSC(self.latestCaloriesBurned)
+            }
+        }
+        healthStore.execute(query)
+    }
+
+    func sendCaloriesToOSC(_ calories: Double) {
+        guard let connection = connection else { return }
+        let message = "/counter,\(calories)"
+        connection.send(content: message.data(using: .utf8), completion: .contentProcessed { _ in })
+    }
+}
+```
+
+- **`ContentView.swift`****:** 提供实时 UI，显示卡路里数据并触发 HealthKit 授权。Provides a real-time UI to display calorie data and trigger HealthKit authorization.
+
+```swift
+import SwiftUI
+
+struct ContentView: View {
+    @StateObject private var healthKitManager = HealthKitManager()
+
+    var body: some View {
+        VStack {
+            Text("Calories Burned")
+                .font(.largeTitle)
+
+            Text("\(healthKitManager.latestCaloriesBurned, specifier: \"%.2f\") kcal")
+                .padding()
+
+            Button("Request Authorization") {
+                healthKitManager.requestAuthorization()
+            }
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+        }
+        .padding()
+    }
+}
+```
+
+
+
+
 ABLETON_PORT = 9000
 client = SimpleUDPClient(ABLETON_IP, ABLETON_PORT)
 
