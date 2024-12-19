@@ -262,7 +262,8 @@ class HealthKitManager: ObservableObject {
 }
 ```
 
-- **`ContentView.swift`****:** 提供实时 UI，显示卡路里数据并触发 HealthKit 授权。Provides a real-time UI to display calorie data and trigger HealthKit authorization.
+  - `ContentView.swift`****:** 提供实时 UI，显示卡路里数据并触发 HealthKit 授权。
+     Provides a real-time UI to display calorie data and trigger HealthKit authorization.
 
 ```swift
 import SwiftUI
