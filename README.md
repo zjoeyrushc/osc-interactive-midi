@@ -234,21 +234,29 @@ with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
 ### 5.1 健康数据桥接：
 
 - **Xcode App 开发：**
+
   - 下载并安装 Xcode，创建一个新的 iOS 项目，选择 SwiftUI 作为界面构建工具。
+
   - 在项目设置中启用 HealthKit 框架，确保添加所需权限。通过创建一个`HealthKitManager.swift` 文件完成对健康数据的获取，本 Demo 以获取卡路里数据为例。
+
   - 授权用户读取健康数据，确保隐私合规性。
+
   - 在原始的 `ContentView.swift` 中构建前端界面，显示实时运动数据并触发授权逻辑。
-  - 将 iPhone 使用数据线连接到 Mac，在 iPhone 上按照提示信任计算机，并在“设置 > 隐私与安全 > 开发者模式”中启用开发者模式。
+
+   - 将 iPhone 使用数据线连接到 Mac，在 iPhone 上按照提示信任计算机，并在“设置 > 隐私与安全 > 开发者模式”中启用开发者模式。
     打开 Xcode，点击顶部菜单中的“设备和模拟器”（Device and Simulators），确保 iPhone 已正确连接并显示在设备列表中，依据提示完成配置。
     在 Xcode 的目标设备菜单中选择 iPhone，点击“运行”（Run）按钮，将应用部署到 iPhone 进行测试。
-  - 运行后就可过 UDP 协议将卡路里数据发送至计划的 Python 模块以供后续处理。
+
+   - 运行后就可过 UDP 协议将卡路里数据发送至计划的 Python 模块以供后续处理。
 
 - **在 Info.plist 中正确配置 HealthKit 权限**
-  - **找到 Info.plist 文件**：
+
+   - **找到 Info.plist 文件**：
     - 打开 Xcode，在左侧的 **Project Navigator** 中选择你的项目名称。
     - 选择 **TARGETS** > 你的应用 Target（例如 `HealthKitCyclingApp`）。
     - 点击顶部的 **Info** 标签。
-  - **添加必要的权限描述**：
+
+   - **添加必要的权限描述**：
     在 **Custom iOS Target Properties** 下，手动添加以下两项：
     - `NSHealthShareUsageDescription`  **值**: 该应用需要访问您的健康数据，以显示健康数据信息。
     - `NSHealthUpdateUsageDescription`  **值**: 该应用需要访问权限以更新您的健康数据。
@@ -268,9 +276,9 @@ class HealthKitManager: ObservableObject {
     let healthStore = HKHealthStore()
     @Published var latestCaloriesBurned: Double = 0.0
 
-    private var connection: NWConnection?
-    private let oscHost = "192.168.1.142"
-    private let oscPort: UInt16 = 8000
+   private var connection: NWConnection?
+   private let oscHost = "192.168.1.142" // 请替换成你的本机的IP地址。
+   private let oscPort: UInt16 = 8000    // 请替换成你的Python脚本的目标端口。
 
     init() {
         setupConnection()
@@ -355,14 +363,20 @@ struct ContentView: View {
 ### **5.2 Python 数据接收、OSC传输与映射**
 
 - **数据接收**
+
   - **方式：** Python 使用 Socket 模块搭建 UDP 服务器，监听端口 8000，接收来自 Swift 端的卡路里数据。
+
   - **消息格式：** Swift 端通过 OSC 协议发送消息，格式为 `/counter,\<calories>`，Python 解析后提取卡路里值。
+
   - **涉及组件：** 
     `socket` 用于接收健康数据，通过 UDP 协议建立服务器监听数据流。
 
 - **数据传输**
+
   - 通过 PythonOSC 将接收的数据以同样的 OSC 协议转发到指定的目标端口（默认示例为 Ableton Live 的 9000 端口，OSC 路径为 `/counter`），为Midi映射建立前置条件。
+
   - **目标地址：** 默认使用 本地回路地址 (127.0.0.1)，但可以根据需求自由定义为任何目标地址，实现跨设备或网络的传输。
+
   - **涉及组件：**
     `threading` 用于创建独立线程，以并行方式发送 MIDI 音符数据，不阻塞主程序运行。
     `pythonosc.udp\_client` 实现 OSC 消息的发送，将映射后的健康数据传输至目标设备或软件（如 Ableton Live）。
