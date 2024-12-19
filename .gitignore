@@ -60,3 +60,25 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Python
+venv/
+.env/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+Pipfile
+Pipfile.lock
+poetry.lock
+.ipynb_checkpoints/
+
+# Local system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Firebase or sensitive files
+GoogleService-Info.plist
+
