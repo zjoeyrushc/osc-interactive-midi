@@ -25,10 +25,10 @@
 
 ## 3 技术栈
 
-- **Python**: 接收或采集数据，完成逻辑处理，将数据映射到音乐参数值区间，转化为符合OSC格式的信号，通过指定路径和端口传输至DAW的OSC插件。
-- **OpenCV**: 摄像头数据分析。
-- **Pynput**: 鼠标移动和点击捕捉。
+- **Python**: 用OpenCV或Pynput等方式灵活接收或采集数据，完成逻辑处理，将数据映射到音乐参数值区间，转化为符合OSC格式的信号，通过指定路径和端口传输至DAW的OSC插件。
+
 - **HealthKit + Xcode（非必须）**: 用Xcode构建APP，通过HealthKit组件获取AppleWatch的运动数据，并把数据发送到Python的接收地址上，提供额外的数据驱动方式。
+- 
 - **Ableton Live（个人选择）**: 接收OSC信号，通过Max For Live插件将数据映射到MIDI合成器参数，转化为最终音乐效果。
 
 ---
@@ -39,7 +39,7 @@
 - **涉及组件：**
   pythonosc.udp\_client：实现 OSC 消息的发送，将处理后数据传输至 Ableton。
 
-- 涉及使用 PythonOSC 建立 UDP 通信，将数据实时传输至 Ableton Live。
+- 使用 PythonOSC 建立 UDP 通信，将数据实时传输至 Ableton Live。
 
 - **网络配置：**
   - 本地 IP 地址：127.0.0.1（本地设备通信）。
@@ -442,4 +442,4 @@ except KeyboardInterrupt:
 
 ```
 
-通过Ableton Live的OSC功能，这些数据可以轻松映射到MIDI参数中。更多细节可参考 Demo 1的操作。基于心跳频率和卡路里消耗的动态数据映射，音乐不仅实现了对个人状态的响应，也让旋律表现出独特的节奏感和情绪变化。每一次的身体数据驱动，都仿佛在为个人创作一部专属的实时乐章。
+最后再次回到Ableton Live的OSC功能，可参考 Demo 1的操作思路。基于心跳频率和卡路里消耗的动态数据映射，音乐不仅实现了对个人状态的响应。
