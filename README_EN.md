@@ -28,13 +28,42 @@ This Demo uses macOS as an example to demonstrate how to transfer camera data, m
 ---
 
 
-## 3 Tech Stack
+## 3 Technology Stack and Dependency Installation
 
-- **Python**: Use libraries like OpenCV or Pynput for flexible data reception or acquisition, process the logic, map the data to music parameter ranges, and convert it into OSC-compatible signals for transmission to the DAW via a specified path and port.
+- **Python**: Use libraries like OpenCV or Pynput to flexibly receive or collect data, process the logic, map the data to music parameter ranges, and convert it into OSC-formatted signals. These signals are transmitted to the DAW through specified paths and ports for music generation.
 
-- **HealthKit + Xcode (optional)**: Build a bridging app with Xcode to obtain activity data from Apple Watch via the HealthKit component and send the data to Python’s receiving address, providing an additional data-driven approach.
+  - **Setup**: Run the following commands to install the required Python dependencies.
 
-- **Ableton Live (personal choice)**: Receive OSC signals and map them to MIDI synthesizer parameters via Max for Live plugins, converting them into final musical effects.
+    ```python
+
+    pip install opencv-python
+
+    pip install python-osc
+
+    pip install pynput```
+
+  
+
+- **HealthKit + Xcode (Optional)**: Build a bridging application with Xcode to collect motion data from Apple Watch using the HealthKit component and send the data to a Python receiver for additional data-driven functionality.
+
+  - **Install Xcode**: Download and install Xcode from the App Store on macOS.
+
+  - **Enable HealthKit**: Open the project and enable HealthKit under the **Capabilities** section.
+
+  - **Run the App**: Connect your iPhone (ensure Developer Mode is enabled), select the device, and click the **Run** button to deploy the app.
+
+- **Ableton Live (Optional)**: Receive OSC signals and use Max for Live plugins to map the data to MIDI synthesizer parameters, resulting in the final musical effects.
+
+  - **Install Ableton Live**: Download and install Ableton Live from the [Ableton website](https://www.ableton.com/) (the Suite version is recommended as it includes Max for Live functionality).
+
+  - **Enable Max for Live**: Ensure **Max for Live** is activated in **Preferences > Licenses/Maintenance**.
+
+  - **Load Max for Live Plugins**: Below are some example plugins to help you quickly set up OSC data reception and conversion.
+
+    - **[OSC Receiver (OSC In)](https://maxforlive.com/library/device/7752/osc-receiver-osc-in)**: A simple OSC receiver plugin that listens to OSC messages on specified ports.
+    - **[Simple OSC to MIDI](https://maxforlive.com/library/device/987/simple-osc-to-midi)**: Maps incoming OSC data to MIDI notes or parameters for real-time music generation.
+    - **[Connection Kit](https://github.com/Ableton/m4l-connection-kit)**: An official toolkit from Ableton that includes various OSC and MIDI tools, enabling connections to sensors, controllers, and other devices for more interactive applications.
+
 
 ---
 
