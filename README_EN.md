@@ -40,8 +40,11 @@ This Demo uses macOS as an example to demonstrate how to transfer camera data, m
 
     pip install python-osc
 
-    pip install pynput```
-
+    pip install pynput
+    
+    # - opencv-python: For processing camera data and video analysis.
+    # - python-osc: For transmitting OSC messages to other software.
+    # - pynput: For capturing mouse input events.```
   
 
 - **HealthKit + Xcode (Optional)**: Build a bridging application with Xcode to collect motion data from Apple Watch using the HealthKit component and send the data to a Python receiver for additional data-driven functionality.
