@@ -25,11 +25,11 @@
 
 ## 3 技术栈
 
-- **Python**: 用OpenCV或Pynput等方式灵活接收或采集数据，完成逻辑处理，将数据映射到音乐参数值区间，转化为符合OSC格式的信号，通过指定路径和端口传输至DAW的OSC插件。
+- **Python**: 用 OpenCV 或 Pynput 等方式灵活接收或采集数据，完成逻辑处理，将数据映射到音乐参数值区间，转化为符合 OSC 格式的信号，通过指定路径和端口传输至 DAW 中进行生成。
 
-- **HealthKit + Xcode（非必须）**: 用Xcode构建APP，通过HealthKit组件获取AppleWatch的运动数据，并把数据发送到Python的接收地址上，提供额外的数据驱动方式。
-- 
-- **Ableton Live（个人选择）**: 接收OSC信号，通过Max For Live插件将数据映射到MIDI合成器参数，转化为最终音乐效果。
+- **HealthKit + Xcode（非必须）**: 用 Xcode 构建桥接应用，通过 HealthKit 组件获取 AppleWatch 的运动数据，并把数据发送到 Python 的接收地址上，提供额外的数据驱动方式。
+
+- **Ableton Live（个人选择）**: 接收 OS C信号，通过 Max For Live 插件将数据映射到 MIDI 合成器参数，转化为最终音乐效果。
 
 ---
 ## 4 Demo 1：摄像头与鼠标数据
@@ -59,7 +59,7 @@
   `numpy`：用于高效的数学计算，例如计算平均亮度和帧差异。
   `time`：控制脚本运行的时间逻辑，如帧率和延迟。
 
-- **示例代码：`/Receive_Camera_Data.py`**
+- **示例代码：`Receive_Camera_Data.py`**
 
 ```python
 import cv2
