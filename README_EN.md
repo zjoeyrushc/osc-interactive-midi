@@ -302,7 +302,7 @@ class HealthKitManager: ObservableObject {
 ```
 
 - **`ContentView.swift`**: Provides a real-time UI to display calorie data and trigger HealthKit authorization.
-- **Sample Code**: [ContentView_CaloriesBurned.swift](./health_data_bridge/ContentView_CaloriesBurned.swift)
+  - **Sample Code**: [ContentView_CaloriesBurned.swift](./health_data_bridge/ContentView_CaloriesBurned.swift)
 
 ```swift
 import SwiftUI
@@ -330,7 +330,7 @@ struct ContentView: View {
     }
 }
 ```
-
+  - In addition, the Swift files for synchronizing heart rate are also provided here for creators to do on their own. [HealthKitManager_HeartRate.swift](./health_data_bridge/HealthKitManager_HeartRate.swift)  [ContentView_HeartRate.swift](./health_data_bridge/ContentView_HeartRate.swift)
 
 
 
@@ -467,7 +467,6 @@ except KeyboardInterrupt:
     receive_sock.close()
 ```
 
-Finally, returning to the OSC functionality in Ableton Live, you can refer to the operational ideas from Demo 1. Based on dynamic data mapping of heart rate and calorie consumption, the music not only responds to personal states but also creates engaging musical interactions.
-
+Finally, returning to the OSC functionality in Ableton Live, you can refer to the operational ideas from Demo 1. 
 
 
