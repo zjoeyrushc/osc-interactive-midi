@@ -61,7 +61,7 @@
   `numpy`：用于高效的数学计算，例如计算平均亮度和帧差异。
   `time`：控制脚本运行的时间逻辑，如帧率和延迟。
 
-- **示例代码：[Receive_Camera_Data.py](./Receive_Camera_Data.py) 
+- **示例代码：[Receive_Camera_Data.py](./osc_midi_scripts/Receive_Camera_Data.py) 
 
 ```python
 import cv2
@@ -142,7 +142,7 @@ finally:
   - **鼠标移动**：映射范围为 [0, 127]，对应 MIDI Note 的音高值。此范围选取是为了贴合 MIDI 标准音符区间，低坐标值映射低音，高坐标值映射高音，路径：`/mouse_position`。
   - **鼠标点击**：映射范围为 [0, 127]，对应 MIDI Velocity（音量强度）。选择该区间是为了控制音符动态表现，与 X 坐标结合生成丰富的旋律，路径：`/trigger_event`。
 
-- **示例代码：[Mouse_Position.py](./Mouse_Position.py)
+- **示例代码：[Mouse_Position.py](./osc_midi_scripts/Mouse_Interaction.py)
 
 ```python
 from pynput import mouse
@@ -202,7 +202,7 @@ with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
 
 - **Xcode App 开发：**
   - 下载并安装 Xcode，创建一个新的 iOS 项目，选择 SwiftUI 作为界面构建工具。
-  - 在项目设置中启用 HealthKit 框架，确保添加所需权限。通过创建一个`HealthKitManager.swift` 文件完成对卡路里数据的获取。
+  - 在项目设置中启用 HealthKit 框架，确保添加所需权限。通过创建一个`HealthKitManager.swift` 文件完成对健康数据的获取，本 Demo 以获取卡路里数据为例。
   - 授权用户读取健康数据，确保隐私合规性。
   - 在原始的 `ContentView.swift` 中构建前端界面，显示实时运动数据并触发授权逻辑。
   - 将 iPhone 使用数据线连接到 Mac，在 iPhone 上按照提示信任计算机，并在“设置 > 隐私与安全 > 开发者模式”中启用开发者模式。
