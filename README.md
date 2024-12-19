@@ -210,13 +210,13 @@ with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
 
 - **在 Info.plist 中正确配置 HealthKit 权限**
   - **找到 Info.plist 文件**：
-   - 打开 Xcode，在左侧的 **Project Navigator** 中选择你的项目名称。
-   - 选择 **TARGETS** > 你的应用 Target（例如 `HealthKitCyclingApp`）。
-   - 点击顶部的 **Info** 标签。
+    - 打开 Xcode，在左侧的 **Project Navigator** 中选择你的项目名称。
+    - 选择 **TARGETS** > 你的应用 Target（例如 `HealthKitCyclingApp`）。
+    - 点击顶部的 **Info** 标签。
   - **添加必要的权限描述**：
-   在 **Custom iOS Target Properties** 下，手动添加以下两项：
-   - `NSHealthShareUsageDescription`  **值**: 该应用需要访问您的健康数据，以显示健康数据信息。
-   - `NSHealthUpdateUsageDescription`  **值**: 该应用需要访问权限以更新您的健康数据。
+    在 **Custom iOS Target Properties** 下，手动添加以下两项：
+    - `NSHealthShareUsageDescription`  **值**: 该应用需要访问您的健康数据，以显示健康数据信息。
+    - `NSHealthUpdateUsageDescription`  **值**: 该应用需要访问权限以更新您的健康数据。
 
 - **核心功能文件：**
   - **`HealthKitManager.swift`**: 负责通过 HealthKit 框架获取卡路里或心率数据，并通过 UDP 将数据发送至 Python 接收端。UDP 的 IP 地址设置为Mac的IP地址（`192.168.1.142` 为我 Mac 的地址），确保 iPhone 和 Mac 处于同一网络环境。以下为核心实例：
