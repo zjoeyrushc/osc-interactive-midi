@@ -231,10 +231,10 @@ with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
 
 - **核心功能文件：**
   - **`HealthKitManager.swift`**: 负责通过 HealthKit 框架获取卡路里或心率数据，并通过 UDP 将数据发送至 Python 接收端。UDP 的 IP 地址设置为Mac的IP地址（`192.168.1.142` 为我 Mac 的地址），确保 iPhone 和 Mac 处于同一网络环境。以下为核心实例：
-   - **Tips：**
+    - **Tips：**
     确保你在 HealthKitManager 中设置的 IP 地址 (oscHost) 为你 Mac 的实际局域网 IP 地址，而不是本地回路 127.0.0.1，因为这会指向 iPhone 自身。
 
-   - **示例代码**：[HealthKitManager_CaloriesBurned.swift](./health_data_bridge/HealthKitManager_CaloriesBurned.swift)
+    - **示例代码**：[HealthKitManager_CaloriesBurned.swift](./health_data_bridge/HealthKitManager_CaloriesBurned.swift)
 ```swift
 import Foundation
 import HealthKit
@@ -296,7 +296,7 @@ class HealthKitManager: ObservableObject {
 ```
 
   - **`ContentView.swift`**: 提供实时 UI，显示卡路里数据并触发 HealthKit 授权。
-   - **示例代码**：[ContentView_CaloriesBurned.swift](./health_data_bridge/ContentView_CaloriesBurned.swift)
+    - **示例代码**：[ContentView_CaloriesBurned.swift](./health_data_bridge/ContentView_CaloriesBurned.swift)
 
 ```swift
 import SwiftUI
@@ -324,7 +324,7 @@ struct ContentView: View {
     }
 }
 ```
-   - 除此之外，还提供心率的 swift 组件，以供创作者自行尝试。[HealthKitManager_HeartRate.swift](./health_data_bridge/HealthKitManager_HeartRate.swift)  [ContentView_HeartRate.swift](./health_data_bridge/ContentView_HeartRate.swift)
+  - 除此之外，还提供同步心率的 swift 文件，以供创作者自行尝试。[HealthKitManager_HeartRate.swift](./health_data_bridge/HealthKitManager_HeartRate.swift)  [ContentView_HeartRate.swift](./health_data_bridge/ContentView_HeartRate.swift)
 
 
 
@@ -359,7 +359,7 @@ struct ContentView: View {
     - 时间间隔范围：[0.1, 1.0] 秒。
     - 映射公式：`interval = max(0.1, 0.5 / calories)`。
 
-- **示例代码：[HealthKitManager_HeartRate.swift](./HealthKitManager_HeartRate.swift)
+- **示例代码**：[Receive_Calories_Burned.py.py](./osc_midi_scripts/Receive_Calories_Burned.py)
 ```python
 import socket
 import threading
