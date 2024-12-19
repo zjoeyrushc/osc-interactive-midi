@@ -61,7 +61,7 @@
   `numpy`：用于高效的数学计算，例如计算平均亮度和帧差异。
   `time`：控制脚本运行的时间逻辑，如帧率和延迟。
 
-- **示例代码：[Receive_Camera_Data.py](./osc_midi_scripts/Receive_Camera_Data.py) 
+- **示例代码**：[Receive_Camera_Data.py](./osc_midi_scripts/Receive_Camera_Data.py) 
 
 ```python
 import cv2
@@ -142,7 +142,7 @@ finally:
   - **鼠标移动**：映射范围为 [0, 127]，对应 MIDI Note 的音高值。此范围选取是为了贴合 MIDI 标准音符区间，低坐标值映射低音，高坐标值映射高音，路径：`/mouse_position`。
   - **鼠标点击**：映射范围为 [0, 127]，对应 MIDI Velocity（音量强度）。选择该区间是为了控制音符动态表现，与 X 坐标结合生成丰富的旋律，路径：`/trigger_event`。
 
-- **示例代码：[Mouse_Interaction.py](./osc_midi_scripts/Mouse_Interaction.py)
+- **示例代码**：[Mouse_Interaction.py](./osc_midi_scripts/Mouse_Interaction.py)
 
 ```python
 from pynput import mouse
@@ -315,6 +315,8 @@ struct ContentView: View {
     }
 }
 ```
+   - 除此之外，还提供心率的 swift 组件，以供创作者自行尝试。[HealthKitManager_HeartRate.swift](./health_data_bridge/HealthKitManager_HeartRate.swift)  [ContentView_HeartRate.swift](./health_data_bridge/ContentView_HeartRate.swift)
+
 
 ### **5.2 Python 数据接收、OSC传输与映射**
 
@@ -444,4 +446,4 @@ except KeyboardInterrupt:
 
 ```
 
-最后再次回到Ableton Live的OSC功能，可参考 Demo 1的操作思路。基于心跳频率和卡路里消耗的动态数据映射，音乐不仅实现了对个人状态的响应。
+最后再次回到Ableton Live的OSC功能，可参考 Demo1 的操作思路。
