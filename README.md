@@ -383,7 +383,7 @@ struct ContentView: View {
     - 时间间隔范围：[0.1, 1.0] 秒。
     - 映射公式：`interval = max(0.1, 0.5 / calories)`。
 
-- **示例代码**：[Receive_Calories_Burned.py.py](./osc_midi_scripts/Receive_Calories_Burned.py)
+- **示例代码**：[Receive_Calories_Burned.py](./osc_midi_scripts/Receive_Calories_Burned.py)
 ```python
 import socket
 import threading
