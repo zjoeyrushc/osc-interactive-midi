@@ -246,12 +246,17 @@ Through the above steps, Ableton Live can receive and process OSC signals in rea
 - **Xcode App Development:**
 
   - Download and install Xcode, create a new iOS project, and select SwiftUI as the UI building tool.
+
   - Enable the HealthKit framework in project settings and ensure the necessary permissions are added. Create a `HealthKitManager.swift` file to retrieve calorie data.
+
   - Authorize users to read health data, ensuring privacy compliance.
+
   - Build the front-end interface in the original `ContentView.swift` to display real-time activity data and trigger authorization logic.
+
   - Connect the iPhone to Mac via a data cable, trust the computer on the iPhone as prompted, and enable Developer Mode under "Settings > Privacy & Security > Developer Mode."
     Open Xcode, click "Device and Simulators" in the top menu, ensure the iPhone is correctly connected and displayed in the device list, and complete the configuration as prompted.
     Select iPhone in the Xcode target device menu and click "Run" to deploy the app to the iPhone for testing.
+
   - After running, UDP protocol can send calorie data to the planned Python module for subsequent processing.
 
 - **Correctly Configure HealthKit Permissions in Info.plist**
@@ -260,6 +265,7 @@ Through the above steps, Ableton Live can receive and process OSC signals in rea
     - Open Xcode and select your project name in the left **Project Navigator**.
     - Select **TARGETS** > your app target (e.g., `HealthKitApp`).
     - Click the **Info** tab at the top.
+
   - **Add Necessary Permission Descriptions**:
     Under **Custom iOS Target Properties**, manually add the following two items:
     - `NSHealthShareUsageDescription`  **Value**: This app requires access to your health data to display health data information.
@@ -372,14 +378,19 @@ struct ContentView: View {
 - **Data Reception**
 
   - **Method:** Use Python's Socket module to set up a UDP server that listens on port 8000 and receives calorie data from Swift.
+
   - **Message Format:** Swift sends messages via the OSC protocol in the format `/counter,\<calories>`, which Python parses to extract calorie values.
+
   - **Components Involved:**
     `socket` is used to receive health data and establish a UDP server for data streaming.
 
 - **Data Transmission**
 
+
   - Use PythonOSC to forward the received data to the specified target port (default example is Ableton Live's port 9000, OSC path `/counter`), creating prerequisites for MIDI mapping.
+
   - **Target Address:** Default to the local loopback address (127.0.0.1), but it can be freely defined for cross-device or network transmission as needed.
+
   - **Components Involved:**
     `threading` creates independent threads to send MIDI note data in parallel without blocking the main program.
     `pythonosc.udp_client` sends OSC messages, transmitting mapped health data to the target device or software (e.g., Ableton Live).
