@@ -30,10 +30,16 @@
 ## 3 技术栈
 
 - **Python**: 用 OpenCV 或 Pynput 等方式灵活接收或采集数据，完成逻辑处理，将数据映射到音乐参数值区间，转化为符合 OSC 格式的信号，通过指定路径和端口传输至 DAW 中进行生成。
+  执行以下命令安装本次 Python 依赖
+```python
+pip install opencv-python
+pip install python-osc
+pip install pynput
+```
 
 - **HealthKit + Xcode（非必须）**: 用 Xcode 构建桥接应用，通过 HealthKit 组件获取 AppleWatch 的运动数据，并把数据发送到 Python 的接收地址上，提供额外的数据驱动方式。
 
-- **Ableton Live（个人选择）**: 接收 OS C信号，通过 Max For Live 插件将数据映射到 MIDI 合成器参数，转化为最终音乐效果。
+- **Ableton Live（个人选择）**: 接收 OSC 信号，通过 Max For Live 插件将数据映射到 MIDI 合成器参数，转化为最终音乐效果。
 
 ---
 
