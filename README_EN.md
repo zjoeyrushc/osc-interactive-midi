@@ -1,5 +1,7 @@
 # OSC Interactive Music: Real-Time Data MIDI Mapping
 
+[中文版](./README.md)
+
 ## 1 Introduction
 
 This Demo uses macOS as an example to demonstrate how to transfer camera data, mouse interactions, and health data (e.g., heart rate and calories) to a DAW via the OSC protocol to generate MIDI music in real time (using Ableton Live as an example). The project code is a simplified personal idea, and apart from data acquisition, creators can focus on how to map synthesizer parameters and arrange musical notes, thereby exploring new ideas for music composition and sound design.
