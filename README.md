@@ -320,30 +320,30 @@ struct ContentView: View {
   - **方式：** Python 使用 Socket 模块搭建 UDP 服务器，监听端口 8000，接收来自 Swift 端的卡路里数据。
   - **消息格式：** Swift 端通过 OSC 协议发送消息，格式为 /counter,\<calories>，Python 解析后提取卡路里值。
   - **涉及组件：** 
-    `socket`：用于接收健康数据，通过 UDP 协议建立服务器监听数据流。
+    `socket` 用于接收健康数据，通过 UDP 协议建立服务器监听数据流。
 
 - **数据传输**
   - 通过 PythonOSC 将接收的数据以同样的 OSC 协议转发到指定的目标端口（默认示例为 Ableton Live 的 9000 端口，OSC 路径为 /counter），为Midi映射建立前置条件。
   - **目标地址：** 默认使用 本地回路地址 (127.0.0.1)，但可以根据需求自由定义为任何目标地址，实现跨设备或网络的传输。
   - **涉及组件：**
-    `threading`：用于创建独立线程，以并行方式发送 MIDI 音符数据，不阻塞主程序运行。
-    `pythonosc.udp\_client`：实现 OSC 消息的发送，将映射后的健康数据传输至目标设备或软件（如 Ableton Live）。
+    `threading` 用于创建独立线程，以并行方式发送 MIDI 音符数据，不阻塞主程序运行。
+    `pythonosc.udp\_client` 实现 OSC 消息的发送，将映射后的健康数据传输至目标设备或软件（如 Ableton Live）。
 
 - **数据映射：**
   - **涉及组件：**
-    `time`：控制数据发送频率，例如为 MIDI 数据生成指定的播放间隔。
-    `random`：生成随机 MIDI 音符，从和弦中随机挑选避免重复音符。
+    `time` 控制数据发送频率，例如为 MIDI 数据生成指定的播放间隔。
+    `random` 生成随机 MIDI 音符，从和弦中随机挑选避免重复音符。
      **更多卡路里消耗对应更高的音符，同时音符播放越密集，反映运动的动态变化。**
 
   - **卡路里到 MIDI 音符的映射：**
-   - 卡路里范围：[0, 5] kcal。
-   - MIDI 音符范围：[21 (A0), 108 (C8)]。
-   - 映射公式：`midi_note = int(21 + (calories / 5) * (108 - 21))`。
+    - 卡路里范围：[0, 5] kcal。
+    - MIDI 音符范围：[21 (A0), 108 (C8)]。
+    - 映射公式：`midi_note = int(21 + (calories / 5) * (108 - 21))`。
 
   - **时间间隔映射：**
-   - 卡路里范围：[0, 50] kcal。
-   - 时间间隔范围：[0.1, 1.0] 秒。
-   - 映射公式：`interval = max(0.1, 0.5 / calories)`。
+    - 卡路里范围：[0, 50] kcal。
+    - 时间间隔范围：[0.1, 1.0] 秒。
+    - 映射公式：`interval = max(0.1, 0.5 / calories)`。
 
 - **示例代码：`Receive_Calories_Burned.py`**
 ```python
