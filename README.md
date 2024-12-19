@@ -356,12 +356,12 @@ struct ContentView: View {
 
 - **数据接收**
   - **方式：** Python 使用 Socket 模块搭建 UDP 服务器，监听端口 8000，接收来自 Swift 端的卡路里数据。
-  - **消息格式：** Swift 端通过 OSC 协议发送消息，格式为 /counter,\<calories>，Python 解析后提取卡路里值。
+  - **消息格式：** Swift 端通过 OSC 协议发送消息，格式为 `/counter,\<calories>`，Python 解析后提取卡路里值。
   - **涉及组件：** 
     `socket` 用于接收健康数据，通过 UDP 协议建立服务器监听数据流。
 
 - **数据传输**
-  - 通过 PythonOSC 将接收的数据以同样的 OSC 协议转发到指定的目标端口（默认示例为 Ableton Live 的 9000 端口，OSC 路径为 /counter），为Midi映射建立前置条件。
+  - 通过 PythonOSC 将接收的数据以同样的 OSC 协议转发到指定的目标端口（默认示例为 Ableton Live 的 9000 端口，OSC 路径为 `/counter`），为Midi映射建立前置条件。
   - **目标地址：** 默认使用 本地回路地址 (127.0.0.1)，但可以根据需求自由定义为任何目标地址，实现跨设备或网络的传输。
   - **涉及组件：**
     `threading` 用于创建独立线程，以并行方式发送 MIDI 音符数据，不阻塞主程序运行。
