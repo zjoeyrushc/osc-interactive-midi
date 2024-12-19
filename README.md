@@ -7,6 +7,7 @@
 
 ---
 
+
 ## 2 核心功能
 
 - **实时数据采集**:
@@ -25,6 +26,7 @@
 
 ---
 
+
 ## 3 技术栈
 
 - **Python**: 用 OpenCV 或 Pynput 等方式灵活接收或采集数据，完成逻辑处理，将数据映射到音乐参数值区间，转化为符合 OSC 格式的信号，通过指定路径和端口传输至 DAW 中进行生成。
@@ -34,6 +36,8 @@
 - **Ableton Live（个人选择）**: 接收 OS C信号，通过 Max For Live 插件将数据映射到 MIDI 合成器参数，转化为最终音乐效果。
 
 ---
+
+
 ## 4 Demo 1：摄像头与鼠标数据
 
 ### **4.1 Python 数据抓取与OSC 传输：**
@@ -46,6 +50,7 @@
 - **网络配置：**
   - 本地 IP 地址：127.0.0.1（本地设备通信）。
   - UDP 端口：9000（确保 Ableton 监听相同端口）。
+
 
 ### **4.2 摄像头数据映射：**
 
@@ -130,6 +135,7 @@ finally:
 
 ```
 
+
 ### **4.3 鼠标数据映射：**
 
 - 捕获鼠标位置与点击，用于动态生成旋律和音量控制。
@@ -180,6 +186,7 @@ with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
     listener.join()
 ```
 
+
 ### **4.4 Ableton Live MIDI生成：**
 
 - **OSC接收与配置：** 使用 Max for Live 的 OSC Receiver 插件设置监听地址和端口，将 Python 发送的数据接入 Ableton。
@@ -196,7 +203,9 @@ with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
 
 ---
 
+
 ## 5 Demo 2：健康数据
+
 
 ### 5.1 健康数据桥接：
 
@@ -316,6 +325,7 @@ struct ContentView: View {
 }
 ```
    - 除此之外，还提供心率的 swift 组件，以供创作者自行尝试。[HealthKitManager_HeartRate.swift](./health_data_bridge/HealthKitManager_HeartRate.swift)  [ContentView_HeartRate.swift](./health_data_bridge/ContentView_HeartRate.swift)
+
 
 
 ### **5.2 Python 数据接收、OSC传输与映射**
