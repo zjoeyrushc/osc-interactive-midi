@@ -236,10 +236,10 @@ Through the above steps, Ableton Live can receive and process OSC signals in rea
 
   - **`HealthKitManager.swift`**: Responsible for retrieving calorie or heart rate data via the HealthKit framework and sending it to the Python receiver via UDP. The UDP IP address is set to the Mac's IP address (e.g., `192.168.1.142`), ensuring that the iPhone and Mac are on the same network. Below is the core example:
 
-  - **Tips:**
+    - **Tips:**
     Ensure that the IP address (oscHost) set in `HealthKitManager` matches your Mac’s actual local network IP address rather than the local loopback `127.0.0.1`, as this would point to the iPhone itself.
 
-  - **Sample Code**: [HealthKitManager_CaloriesBurned.swift](./health_data_bridge/HealthKitManager_CaloriesBurned.swift)
+    - **Sample Code**: [HealthKitManager_CaloriesBurned.swift](./health_data_bridge/HealthKitManager_CaloriesBurned.swift)
 
 ```swift
 import Foundation
@@ -301,8 +301,8 @@ class HealthKitManager: ObservableObject {
 }
 ```
 
-- **`ContentView.swift`**: Provides a real-time UI to display calorie data and trigger HealthKit authorization.
-  - **Sample Code**: [ContentView_CaloriesBurned.swift](./health_data_bridge/ContentView_CaloriesBurned.swift)
+  - **`ContentView.swift`**: Provides a real-time UI to display calorie data and trigger HealthKit authorization.
+    - **Sample Code**: [ContentView_CaloriesBurned.swift](./health_data_bridge/ContentView_CaloriesBurned.swift)
 
 ```swift
 import SwiftUI
@@ -370,7 +370,7 @@ struct ContentView: View {
     - Interval Range: [0.1, 1.0] seconds.
     - Mapping Formula: `interval = max(0.1, 0.5 / calories)`.
 
-- **Sample Code: `Receive_Calories_Burned.py`**
+- **Sample Code: [Receive_Calories_Burned.py](./osc_midi_scripts/Receive_Calories_Burned.py)
 
 ```python
 import socket
