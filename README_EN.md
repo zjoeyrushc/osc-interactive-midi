@@ -399,7 +399,7 @@ struct ContentView: View {
 
   - **Components Involved:**
     `time` controls data transmission frequency, e.g., generating specified playback intervals for MIDI data.
-    `random` generates random MIDI notes, randomly selecting from chords to avoid repetitive notes.
+    `random` generates random MIDI notes, randomly selecting from dominant seventh chord and avoid repetitive notes.
     **More calories burned correspond to higher notes, and notes are played more densely, reflecting dynamic changes in activity.**
 
   - **Calorie-to-MIDI Note Mapping:**
