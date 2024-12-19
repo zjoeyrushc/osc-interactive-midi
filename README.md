@@ -1,42 +1,36 @@
-# OSC Interactive Music: Real-Time Data to MIDI Mapping
+# OSC互动音乐: 实时数据MIDI合成器映射
 
-## 项目简介 | Project Overview
-
-**English**:
-This project demonstrates how real-time data inputs (camera visuals, mouse movements, and health metrics) can dynamically control MIDI music generation using OSC (Open Sound Control). It explores interactive sound mapping, combining user actions, visuals, and biological data into dynamic audio outputs.
-
+## 简介
 **中文**:
-本项目展示如何通过摄像头数据、鼠标交互及健康数据（如心率和卡路里），实时控制 MIDI 音乐生成，使用 OSC（开放声音控制）协议传输数据。项目探索了用户行为、视觉反馈与生物数据如何结合，创造互动的动态音乐体验。
+本Demo以MacOS为例展示如何通过摄像头数据、鼠标交互及健康数据（如心率和卡路里），实时控制 MIDI 音乐生成，使用 OSC（开放声音控制）协议传输数据。项目探索了用户行为、视觉反馈与生物数据如何结合，创造互动的动态音乐体验。
 
 ---
 
-## 核心功能 | Key Features
+## 核心功能
 
-- **实时数据采集 | Real-Time Data Input**:
+- **实时数据采集**:
 
-  - 摄像头亮度与运动量 | Camera brightness and motion intensity.
-  - 鼠标移动与点击 | Mouse movement and clicks.
-  - 健康数据：心率与卡路里 | Health metrics: Heart rate and calories burned.
+  - 摄像头画面亮度、色彩偏移与运动量
+  - 鼠标移动与点击
+  - 健康数据：心率与卡路里
 
-- **OSC 数据传输 | OSC Communication**:
+- **OSC 数据传输**:
 
   - 将处理后的数据传输到 Ableton Live 或其他支持 OSC 的软件。
-  - Transmit processed data to Ableton Live or other OSC-compatible software.
 
-- **音乐生成 | Music Generation**:
+- **音乐生成**:
 
   - 将数据映射为 MIDI 音符、力度和滤波器参数。
-  - Map data to MIDI notes, velocity, and filter parameters for dynamic music generation.
 
 ---
 
-## 技术栈 | Technology Stack
+## 技术栈
 
-- **Python**: 数据输入、处理和 OSC 消息传输 | Data input, processing, and OSC message transmission.
-- **OpenCV**: 摄像头数据分析 | Camera data analysis (brightness and motion).
-- **Pynput**: 鼠标移动和点击捕捉 | Mouse movement and click capture.
-- **HealthKit + Xcode**: 从 iPhone 传输心率和卡路里数据 | Transmit heart rate and calorie data from iPhone.
-- **Ableton Live**: 映射 OSC 数据到 MIDI 音符和合成器参数 | Map OSC data to MIDI notes and synth parameters.
+- **Python**: 数据输入、处理和 OSC 消息传输
+- **OpenCV**: 摄像头数据分析
+- **Pynput**: 鼠标移动和点击捕捉
+- **HealthKit + Xcode**: 从 iPhone 传输心率和卡路里数据
+- **Ableton Live**: 映射 OSC 数据到 MIDI 音符和合成器参数
 
 ---
 ## 项目 1：摄像头与鼠标数据
@@ -62,7 +56,7 @@ This project demonstrates how real-time data inputs (camera visuals, mouse movem
 
   - **画面亮度**：映射范围为 [0, 10]，对应 MIDI Program Change 的和弦选择。选择 0-10 的范围是因为此值反映了和弦种类的切换，对应不同音乐情绪的切换。路径：`/brightness`。
   - **颜色偏移**：映射范围为 [-1, 1]，对应滤波器参数变化，用于调整声音的音色特性。此区间直接反映色彩差异强弱，并产生独特的声音纹理。路径：`/color_shift`。
-  - **运动量**：映射范围为 [0, 127]，用于触发打击乐的节奏强度（MIDI Velocity）。此区间对应 MIDI 标准的打击力度，能有效控制节奏表现力。路径：`/motion`。
+  - **运动量**：映射范围为 [0, 127]，用于触发打击乐的节奏强度（MIDI Velocity）。此区间对应 MIDI 标准的打击力度，能有效控制节奏表现力。路径：`/motion_intensity`。
 
 - 涉及组件：
 
@@ -155,8 +149,8 @@ finally:
 
 - **数据映射及区间：**
 
-  - **X 坐标**：映射范围为 [0, 127]，对应 MIDI Note 的音高值。此范围选取是为了贴合 MIDI 标准音符区间，低坐标值映射低音，高坐标值映射高音，路径：`/mouse/x`。
-  - **Y 坐标**：映射范围为 [0, 127]，对应 MIDI Velocity（音量强度）。选择该区间是为了控制音符动态表现，与 X 坐标结合生成丰富的旋律，路径：`/mouse/y`。
+  - **鼠标移动**：映射范围为 [0, 127]，对应 MIDI Note 的音高值。此范围选取是为了贴合 MIDI 标准音符区间，低坐标值映射低音，高坐标值映射高音，路径：`/mouse_position`。
+  - **鼠标点击**：映射范围为 [0, 127]，对应 MIDI Velocity（音量强度）。选择该区间是为了控制音符动态表现，与 X 坐标结合生成丰富的旋律，路径：`trigger_event`。
 
 示例代码：
 
@@ -240,7 +234,6 @@ Ableton Live MIDI生成：
 
   - `HealthKitManager.swift`: 负责通过 HealthKit 框架获取卡路里数据，并通过 UDP 将数据发送至 Python 接收端。UDP 的 IP 地址设置为Mac的IP地址（`192.168.1.142` 为我 Mac 的地址），确保 iPhone 和 Mac 处于同一网络环境。以下为核心实例：
   - Tips：
-
     确保你在 HealthKitManager 中设置的 IP 地址 (oscHost) 为你 Mac 的实际局域网 IP 地址，而不是本地回路 127.0.0.1，因为这会指向 iPhone 自身。
 
 ```swift
@@ -303,7 +296,7 @@ class HealthKitManager: ObservableObject {
 }
 ```
 
-- `ContentView.swift`: 提供实时 UI，显示卡路里数据并触发 HealthKit 授权。
+  - `ContentView.swift`: 提供实时 UI，显示卡路里数据并触发 HealthKit 授权。
 
 ```swift
 import SwiftUI
