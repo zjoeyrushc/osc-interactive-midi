@@ -2,11 +2,6 @@
 
 [ENGLISH VERSION](./README_EN.md)
 
- [Receive_Camera_Data.py](./Receive_Camera_Data.py)
-[Mouse_Position.py](./Mouse_Position.py)
-[HealthKitManager_HeartRate.swift](./HealthKitManager_HeartRate.swift)
-[ContentView_HeartRate.swift](./ContentView_HeartRate.swift)
-
 ## 1 简介
 本 Demo 以 macOS 为例，展示如何通过 OSC 协议，把摄像头数据、鼠标交互及健康数据（如心率和卡路里）传递到 DAW 实时生成 MIDI 音乐（以 AbletonLive 为例）。项目中的代码仅为简易化的个人思路，除了数据获取，各创作者的关注点可放在如何映射合成器参数与音符编排上，从而拓展编曲与声音设计的新思路。
 
@@ -66,7 +61,7 @@
   `numpy`：用于高效的数学计算，例如计算平均亮度和帧差异。
   `time`：控制脚本运行的时间逻辑，如帧率和延迟。
 
-- **示例代码：`Receive_Camera_Data.py`**
+- **示例代码：[Receive_Camera_Data.py](./Receive_Camera_Data.py) 
 
 ```python
 import cv2
@@ -147,7 +142,7 @@ finally:
   - **鼠标移动**：映射范围为 [0, 127]，对应 MIDI Note 的音高值。此范围选取是为了贴合 MIDI 标准音符区间，低坐标值映射低音，高坐标值映射高音，路径：`/mouse_position`。
   - **鼠标点击**：映射范围为 [0, 127]，对应 MIDI Velocity（音量强度）。选择该区间是为了控制音符动态表现，与 X 坐标结合生成丰富的旋律，路径：`/trigger_event`。
 
-- **示例代码：`/mouse_interaction.py`**
+- **示例代码：[Mouse_Position.py](./Mouse_Position.py)
 
 ```python
 from pynput import mouse
@@ -292,7 +287,7 @@ class HealthKitManager: ObservableObject {
 ```
 
   - **`ContentView.swift`**: 提供实时 UI，显示卡路里数据并触发 HealthKit 授权。
-   - **示例代码：`/ContentView_CaloriesBurned.swift`**
+   - **示例代码：[ContentView_CaloriesBurned.swift](./ContentView_CaloriesBurned.swift)
 
 ```swift
 import SwiftUI
@@ -352,7 +347,7 @@ struct ContentView: View {
     - 时间间隔范围：[0.1, 1.0] 秒。
     - 映射公式：`interval = max(0.1, 0.5 / calories)`。
 
-- **示例代码：`Receive_Calories_Burned.py`**
+- **示例代码：[HealthKitManager_HeartRate.swift](./HealthKitManager_HeartRate.swift)
 ```python
 import socket
 import threading
