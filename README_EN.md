@@ -258,7 +258,7 @@ Through the above steps, Ableton Live can receive and process OSC signals in rea
 
   - **Locate the Info.plist File**:
     - Open Xcode and select your project name in the left **Project Navigator**.
-    - Select **TARGETS** > your app target (e.g., `HealthKitCyclingApp`).
+    - Select **TARGETS** > your app target (e.g., `HealthKitApp`).
     - Click the **Info** tab at the top.
   - **Add Necessary Permission Descriptions**:
     Under **Custom iOS Target Properties**, manually add the following two items:
@@ -267,7 +267,7 @@ Through the above steps, Ableton Live can receive and process OSC signals in rea
 
 - **Core Functionality Files:**
 
-  - **`HealthKitManager.swift`**: Responsible for retrieving calorie or heart rate data via the HealthKit framework and sending it to the Python receiver via UDP. The UDP IP address is set to the Mac's IP address (e.g., `192.168.1.142`), ensuring that the iPhone and Mac are on the same network. Below is the core example:
+  - **`HealthKitManager.swift`**: Responsible for retrieving calorie or heart rate data via the HealthKit framework and sending it to the Python receiver via UDP. The UDP IP address is set to the Mac's IP address (e.g., `192.168.1.142`), ensuring that the iPhone and Mac are on the same network. 
 
     - **Tips:**
     Ensure that the IP address (oscHost) set in `HealthKitManager` matches your Mac’s actual local network IP address rather than the local loopback `127.0.0.1`, as this would point to the iPhone itself.
@@ -284,8 +284,8 @@ class HealthKitManager: ObservableObject {
     @Published var latestCaloriesBurned: Double = 0.0
 
     private var connection: NWConnection?
-    private let oscHost = "192.168.1.142"
-    private let oscPort: UInt16 = 8000
+    private let oscHost = "192.168.1.142" # Please replace with your local machine's IP address. 
+    private let oscPort: UInt16 = 8000 # Please replace with your target port. 
 
     init() {
         setupConnection()
@@ -363,7 +363,7 @@ struct ContentView: View {
     }
 }
 ```
-  - In addition, the Swift files for synchronizing heart rate are also provided here for creators to do on their own. [HealthKitManager_HeartRate.swift](./health_data_bridge/HealthKitManager_HeartRate.swift)  [ContentView_HeartRate.swift](./health_data_bridge/ContentView_HeartRate.swift)
+  - In addition, the Swift files for synchronizing heart rate are also provided here for creators to do on their own. [HealthKitManager_HeartRate.swift](./health_data_bridge/HealthKitManager_HeartRate.swift) and [ContentView_HeartRate.swift](./health_data_bridge/ContentView_HeartRate.swift)
 
 
 
