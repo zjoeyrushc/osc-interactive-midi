@@ -114,6 +114,10 @@ OSC_ADDRESS_MOTION_INTENSITY = "/motion_intensity"
 # 初始化前一帧（用于运动检测）
 prev_frame = None
 
+def normalize(value, old_min, old_max, new_min=0, new_max=127):
+    """将值归一化到指定范围 0-127"""
+    return new_min + (value - old_min) * (new_max - new_min) / (old_max - old_min)
+
 try:
     while cap.isOpened():
         ret, frame = cap.read()
@@ -125,21 +129,24 @@ try:
 
         # 1. **亮度映射**: 计算平均亮度
         avg_brightness = np.mean(gray)
-        client.send_message(OSC_ADDRESS_BRIGHTNESS, avg_brightness)
-        print(f"Brightness: {avg_brightness}")
+        normalized_brightness = normalize(avg_brightness, 0, 255)  # 灰度范围是 [0, 255]
+        client.send_message(OSC_ADDRESS_BRIGHTNESS, normalized_brightness)
+        print(f"Brightness: {normalized_brightness}")
 
         # 2. **颜色偏移映射**: 计算 RGB 分布偏移
         avg_color = frame.mean(axis=(0, 1))  # 获取 RGB 三通道平均值
         color_shift = avg_color[2] - avg_color[0]  # 红色与蓝色通道的差异
-        client.send_message(OSC_ADDRESS_COLOR_SHIFT, color_shift)
-        print(f"Color Shift (Red-Blue): {color_shift}")
+        normalized_color_shift = normalize(color_shift, -255, 255)  # 假定颜色差异范围是 [-255, 255]
+        client.send_message(OSC_ADDRESS_COLOR_SHIFT, normalized_color_shift)
+        print(f"Color Shift (Red-Blue): {normalized_color_shift}")
 
         # 3. **运动量映射**: 通过帧差异检测运动强度
         if prev_frame is not None:
             frame_diff = cv2.absdiff(prev_frame, gray)  # 计算当前帧与前一帧的差异
-            motion_intensity = np.sum(frame_diff) / (frame_diff.shape[0] * frame_diff.shape[1])
-            client.send_message(OSC_ADDRESS_MOTION_INTENSITY, motion_intensity)
-            print(f"Motion Intensity: {motion_intensity}")
+            motion_intensity = np.sum(frame_diff) / (frame_diff.shape[0] * frame_diff.shape[1])  # 平均差异
+            normalized_motion_intensity = normalize(motion_intensity, 0, 255)  # 差异范围是 [0, 255]
+            client.send_message(OSC_ADDRESS_MOTION_INTENSITY, normalized_motion_intensity)
+            print(f"Motion Intensity: {normalized_motion_intensity}")
 
         prev_frame = gray  # 更新前一帧
 
@@ -156,7 +163,6 @@ except KeyboardInterrupt:
 finally:
     cap.release()
     cv2.destroyAllWindows()
-
 ```
 
 
