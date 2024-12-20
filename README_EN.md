@@ -88,7 +88,7 @@ This Demo uses macOS as an example to demonstrate how to transfer camera data, m
 
 ### **4.2 Camera Data Mapping:**
 
-- Capture frame brightness, color offset, and motion intensity using OpenCV to generate dynamic music. **The mapping relationship can be customized according to the target parameters of the synthesizer.**
+- **Using OpenCV to capture screen brightness, color shift (warmth vs. coolness), and motion intensity (degree of camera movement) for generating dynamic music. The mapping relationships can be customized based on the target parameters of the synthesizer.**
 
 - **Data Mapping and Ranges:**
 
