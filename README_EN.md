@@ -92,8 +92,10 @@ This Demo uses macOS as an example to demonstrate how to transfer camera data, m
 
 - **Data Mapping and Ranges:**
 
-  - **Frame Brightness**:Mapped from `[0, 255]` to `[0, 127]`. Suitable for controlling melody dynamics, in this case used for generating MIDI and mapping to pitch. Higher brightness corresponds to higher pitch, path `/brightness`.  
+  - **Frame Brightness**: Mapped from `[0, 255]` to `[0, 127]`. Suitable for controlling melody dynamics, in this case used for generating MIDI and mapping to pitch. Higher brightness corresponds to higher pitch, path `/brightness`.  
+
   - **Color Offset**: Mapped from `[-255, 255]` to `[0, 127]`. Suitable for controlling timbre variation, in this case used for filter adjustments. Warmer colors can correspond to softer timbres, cooler colors to harder timbres, path `/color_shift`.  
+
   - **Motion Intensity**: Mapped from `[0, 255]` to `[0, 127]`. In this case, it is used for a supplementary track’s accent timbre. Higher intensity corresponds to stronger dynamic effects, while lower intensity corresponds to weaker ones, path `/motion_intensity`.
 
 - **Components Involved:**
@@ -187,6 +189,7 @@ finally:
 - **Data Mapping and Ranges:**
 
   - **Mouse Movement**: Mapping range is [0, 127], corresponding to MIDI Note pitch values. This range is chosen to align with the standard MIDI note range, where lower coordinate values map to lower pitches and higher values map to higher pitches. Path: `/mouse_position`.
+
   - **Mouse Clicks**: Mapping range is [0, 127], corresponding to MIDI Velocity (volume intensity). This range is chosen to control the dynamic performance of notes, generating rich melodies in combination with the X-coordinate. Path: `/trigger_event`.
 
 - **Sample Code**: [Mouse_Interaction.py](./osc_midi_scripts/Mouse_Interaction.py)
