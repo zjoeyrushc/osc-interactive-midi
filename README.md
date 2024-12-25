@@ -280,57 +280,194 @@ import Network
 
 class HealthKitManager: ObservableObject {
     let healthStore = HKHealthStore()
-    @Published var latestCaloriesBurned: Double = 0.0
-
-   private var connection: NWConnection?
-   private let oscHost = "192.168.1.142" // 请替换成你的本机的IP地址。
-   private let oscPort: UInt16 = 8000    // 请替换成你的Python脚本的目标端口。
+    
+    // 我们只统计“本次会话”的累计值
+    @Published var sessionCalories: Double = 0.0
+    
+    private var sessionStartTime: Date?
+    private var lastSentCalories: Double? // 上次发送的卡路里值，nil 表示尚未发送过
+    
+    // UDP 相关
+    private var connection: NWConnection?
+    private let oscHost = "192.168.66.235" // 根据你的需求修改 IP
+    private let oscPort: UInt16 = 8000
+    
+    // 定时器
+    private var timer: Timer?
 
     init() {
         setupConnection()
     }
 
     func setupConnection() {
-        connection = NWConnection(host: NWEndpoint.Host(oscHost), port: NWEndpoint.Port(rawValue: oscPort)!, using: .udp)
+        connection = NWConnection(
+            host: NWEndpoint.Host(oscHost),
+            port: NWEndpoint.Port(rawValue: oscPort)!,
+            using: .udp
+        )
+        connection?.stateUpdateHandler = { state in
+            switch state {
+            case .ready:
+                print("Connection ready on \(self.oscHost):\(self.oscPort)")
+            case .failed(let error):
+                print("Connection failed: \(error.localizedDescription)")
+            default:
+                break
+            }
+        }
         connection?.start(queue: .main)
     }
 
+    // --------------------------------------
+    // MARK: - 请求授权
+    // --------------------------------------
     func requestAuthorization() {
-        guard HKHealthStore.isHealthDataAvailable() else { return }
-        let energyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
-        healthStore.requestAuthorization(toShare: nil, read: [energyType]) { success, _ in
+        guard HKHealthStore.isHealthDataAvailable() else {
+            print("HealthKit not available on this device")
+            return
+        }
+        
+        let activeEnergyBurnedType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
+        let typesToRead: Set<HKObjectType> = [activeEnergyBurnedType]
+        
+        healthStore.requestAuthorization(toShare: nil, read: typesToRead) { success, error in
             if success {
-                self.startCaloriesQuery()
+                print("HealthKit authorization granted")
+            } else {
+                print("Authorization failed: \(error?.localizedDescription ?? "Unknown error")")
             }
         }
     }
-
-    func startCaloriesQuery() {
-        let energyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
-        let query = HKObserverQuery(sampleType: energyType, predicate: nil) { _, _, _ in
-            self.fetchLatestCaloriesBurned()
+    
+    // --------------------------------------
+    // MARK: - 开始会话：记录起点 & 启动监听
+    // --------------------------------------
+    func startSession() {
+        sessionStartTime = Date()  // 从现在开始统计
+        sessionCalories = 0.0      // 重置
+        lastSentCalories = nil     // 重置记录的上次发送值
+        
+        // 启动 Observer Query
+        startObserverQuery()
+        
+        // 启动定时器，每隔 5 秒查一次，作为兜底
+        timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
+            guard let self = self, let startTime = self.sessionStartTime else { return }
+            
+            self.fetchAccumulatedCalories(since: startTime) { value in
+                print("Periodic fetch: \(value) kcal")
+            }
         }
+    }
+    
+    func stopSession() {
+        timer?.invalidate()
+        timer = nil
+        sessionStartTime = nil
+    }
+
+    // --------------------------------------
+    // MARK: - Observer Query: 监听底层写入事件
+    // --------------------------------------
+    private func startObserverQuery() {
+        let activeEnergyBurnedType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
+        let query = HKObserverQuery(sampleType: activeEnergyBurnedType, predicate: nil) { [weak self] _, completionHandler, error in
+            if let error = error {
+                print("Observer query error: \(error.localizedDescription)")
+                return
+            }
+
+            guard let self = self, let startTime = self.sessionStartTime else { return }
+            
+            // 主动触发数据更新
+            self.fetchAccumulatedCalories(since: startTime) { value in
+                print("Observer fetch: \(value) kcal")
+            }
+            
+            completionHandler() // 告诉系统观察已经处理完成
+        }
+        
         healthStore.execute(query)
     }
 
-    func fetchLatestCaloriesBurned() {
-        let energyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
-        let query = HKSampleQuery(sampleType: energyType, predicate: nil, limit: 1, sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)]) { _, results, _ in
-            guard let sample = results?.first as? HKQuantitySample else { return }
+    // --------------------------------------
+    // MARK: - 查询：自定义起点 -> 现在
+    // --------------------------------------
+    func fetchAccumulatedCalories(since startTime: Date, completion: @escaping (Double) -> Void) {
+        let now = Date()
+        
+        let predicate = HKQuery.predicateForSamples(
+            withStart: startTime,
+            end: now,
+            options: .strictStartDate
+        )
+        
+        let activeEnergyBurnedType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!
+        let query = HKStatisticsQuery(
+            quantityType: activeEnergyBurnedType,
+            quantitySamplePredicate: predicate,
+            options: .cumulativeSum
+        ) { _, result, error in
+            
+            // 如果 result 或 sumQuantity() 为空，就把卡路里设为 0
+            let kcalValue: Double
+            if let result = result, let sum = result.sumQuantity() {
+                kcalValue = sum.doubleValue(for: .kilocalorie())
+            } else {
+                kcalValue = 0
+            }
+            
             DispatchQueue.main.async {
-                self.latestCaloriesBurned = sample.quantity.doubleValue(for: .kilocalorie())
-                self.sendCaloriesToOSC(self.latestCaloriesBurned)
+                self.sessionCalories = kcalValue
+
+                // ----------------------------------------
+                // 强制“只要是 0，就发送”，
+                // 非 0 时，只有当变化或初次发送才发送
+                // ----------------------------------------
+                if kcalValue == 0 {
+                    print("===> [Always send 0] lastSentCalories: \(String(describing: self.lastSentCalories)), current: \(kcalValue)")
+                    self.sendCaloriesToOSC(kcalValue)
+                    self.lastSentCalories = kcalValue
+                } else if self.lastSentCalories == nil || kcalValue != self.lastSentCalories {
+                    print("===> [Send changed value] lastSentCalories: \(String(describing: self.lastSentCalories)), current: \(kcalValue)")
+                    self.sendCaloriesToOSC(kcalValue)
+                    self.lastSentCalories = kcalValue
+                } else {
+                    print("===> [No send] lastSentCalories: \(String(describing: self.lastSentCalories)), current: \(kcalValue)")
+                }
+                
+                completion(kcalValue)
             }
         }
+        
         healthStore.execute(query)
     }
-
+    
+    // --------------------------------------
+    // MARK: - 发送数据到 Python (OSC)
+    // --------------------------------------
     func sendCaloriesToOSC(_ calories: Double) {
-        guard let connection = connection else { return }
-        let message = "/counter,\(calories)"
-        connection.send(content: message.data(using: .utf8), completion: .contentProcessed { _ in })
+        guard let connection = connection else {
+            print("Connection not established")
+            return
+        }
+
+        let oscMessage = "/counter,\(calories)"
+        guard let messageData = oscMessage.data(using: .utf8) else {
+            print("Failed to encode OSC message")
+            return
+        }
+
+        connection.send(content: messageData, completion: .contentProcessed { error in
+            if let error = error {
+                print("Failed to send OSC message: \(error.localizedDescription)")
+            } else {
+                print("Sent session-based kcal to OSC: \(oscMessage)")
+            }
+        })
     }
 }
+
 ```
 
   - **`ContentView.swift`**: 提供实时 UI，显示卡路里数据并触发 HealthKit 授权。
@@ -341,24 +478,61 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var healthKitManager = HealthKitManager()
+    @State private var isSessionActive = false // 标记是否正在进行会话
 
     var body: some View {
-        VStack {
-            Text("Calories Burned")
+        VStack(spacing: 20) {
+            Text("Workout Session")
                 .font(.largeTitle)
-
-            Text("\(healthKitManager.latestCaloriesBurned, specifier: "%.2f") kcal")
                 .padding()
 
-            Button("Request Authorization") {
-                healthKitManager.requestAuthorization()
+            // 显示当前会话的累计卡路里消耗
+            Text("Session Calories Burned: \(healthKitManager.sessionCalories, specifier: "%.2f") kcal")
+                .padding()
+                .font(.title2)
+
+            HStack(spacing: 20) {
+                // 开始会话按钮
+                Button(action: {
+                    if !isSessionActive {
+                        healthKitManager.requestAuthorization()
+                        healthKitManager.startSession()
+                        isSessionActive = true
+                    }
+                }) {
+                    Text("Start Session")
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(isSessionActive ? Color.gray : Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .disabled(isSessionActive) // 防止重复开始
+
+                // 停止会话按钮
+                Button(action: {
+                    if isSessionActive {
+                        healthKitManager.stopSession()
+                        isSessionActive = false
+                    }
+                }) {
+                    Text("Stop Session")
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(isSessionActive ? Color.red : Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .disabled(!isSessionActive) // 仅在会话进行中可用
             }
             .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(10)
+
+            Spacer()
         }
         .padding()
+        .onChange(of: healthKitManager.sessionCalories) { newValue in
+            print("Session Calories updated: \(newValue)")
+        }
     }
 }
 ```
