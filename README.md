@@ -3,7 +3,7 @@
 [ENGLISH VERSION](./README_EN.md)
 
 ## 1 简介
-本 Demo 以 macOS 为例，展示如何通过 OSC 协议，把摄像头数据、鼠标交互及健康数据（如心率和卡路里）传递到 DAW 实时生成 MIDI 音乐（以 AbletonLive 为例）。项目中的代码仅为简易化的个人思路，除了数据获取，各创作者的关注点可放在如何映射合成器参数与音符编排上，从而拓展编曲与声音设计的新思路。
+本 Demo 以 macOS 为例，展示如何通过 OSC 协议，把摄像头数据、鼠标交互及健康数据（如心率和卡路里）传递到 DAW 实时生成 MIDI 声音（以 AbletonLive 为例）。项目中的代码仅为简易化的个人思路，除了数据获取，各创作者的关注点可放在如何映射合成器参数与音符编排上，从而拓展编曲与声音设计的新思路。
 
 ---
 
@@ -379,7 +379,7 @@ struct ContentView: View {
 
 - **数据传输**
 
-  - 通过 PythonOSC 将接收的数据以同样的 OSC 协议转发到指定的目标端口（默认示例为 Ableton Live 的 9000 端口，OSC 路径为 `/counter`），为Midi映射建立前置条件。
+  - 通过 PythonOSC 将接收的数据以同样的 OSC 协议转发到指定的目标端口（默认示例为 Ableton Live 的 9000 端口，OSC 路径为 `/counter`），为 MIDI 映射建立前置条件。
 
   - **目标地址：** 默认使用 本地回路地址 (127.0.0.1)，但可以根据需求自由定义为任何目标地址，实现跨设备或网络的传输。
 
@@ -389,19 +389,19 @@ struct ContentView: View {
 
 - **数据映射：**
   - **涉及组件：**
-    `time` 控制数据发送频率，例如为 MIDI 数据生成指定的播放间隔。
-    `random` 生成随机 MIDI 音符，从属七和弦中随机挑选，并避免重复音符。
+    `time` 控制数据发送频率，通过指数平滑算法动态调整时间间隔，确保发送频率更加平滑且符合卡路里变化趋势。
+    `random` 生成随机 MIDI 音符，从属七和弦中随机挑选，并避免连续重复音符。
      **更多卡路里消耗对应更高的音符，同时音符播放越密集，反映运动的动态变化。**
 
   - **卡路里到 MIDI 音符的映射：**
-    - 卡路里范围：[0, 5] kcal。
+    - 卡路里范围：[0, 100] kcal。
     - MIDI 音符范围：[21 (A0), 108 (C8)]。
-    - 映射公式：`midi_note = int(21 + (calories / 5) * (108 - 21))`。
+    - 映射公式：`midi_note = int(21 + (calories / 100) * (108 - 21))`。
 
   - **时间间隔映射：**
-    - 卡路里范围：[0, 50] kcal。
-    - 时间间隔范围：[0.1, 1.0] 秒。
-    - 映射公式：`interval = max(0.1, 0.5 / calories)`。
+    - 初始时间间隔：5 秒。
+    - 指数平滑公式：`smooth_interval = (1 - ALPHA) * smooth_interval + ALPHA * (5.0 / (calories + 1))`。
+    - 限制范围：`interval = max(0.1, smooth_interval)`。
 
 - **示例代码**：[Receive_Calories_Burned.py](./osc_midi_scripts/Receive_Calories_Burned.py)
 ```python
@@ -411,6 +411,25 @@ from pythonosc.udp_client import SimpleUDPClient
 import time
 import random  # 用于随机选择音符
 
+# -----------------------
+# 全局变量
+# -----------------------
+running = True                # 控制线程运行状态
+current_calories = 0.0        # 当前卡路里值
+root_note = 21                # 初始音符 (Grand Piano 的最低音 A0)
+last_note = None              # 记录上一次发送的音符，防止重复
+
+# 发送音符间隔相关：初始间隔 5s，使用指数平滑
+smooth_interval = 5.0         # 平滑用的临时变量
+current_interval = 5.0        # 实际控制的发送间隔
+ALPHA = 0.1                   # 平滑因子（0~1之间，越小越平缓）
+
+# 属七和弦偏移量（根音、大三度、纯五度、小七度）
+dominant_seventh_offsets = [0, 4, 7, 10]
+
+# -----------------------
+# Socket 配置
+# -----------------------
 # 设置接收卡路里数据的 Socket
 receive_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 receive_sock.bind(("0.0.0.0", 8000))  # 监听 8000 端口
@@ -420,51 +439,38 @@ ABLETON_IP = "127.0.0.1"  # 本地回环地址
 ABLETON_PORT = 9000       # Ableton 接收 OSC 的端口
 client = SimpleUDPClient(ABLETON_IP, ABLETON_PORT)
 
-# 全局变量
-total_calories = 0.0  # 累计卡路里消耗
-current_interval = 1.0  # 默认音符间隔 1 秒
-root_note = 21  # 初始音符 (Grand Piano 的最低音 A0)
-running = True  # 控制线程运行状态
-last_note = None  # 记录上一次发送的音符，防止重复
-
-# 属七和弦偏移量
-dominant_seventh_offsets = [0, 4, 7, 10]  # 根音、大三度、纯五度、小七度
-
 def map_calories_to_midi(calories):
     """
     将卡路里值映射到 Grand Piano 的 MIDI 音符范围。
-    - 卡路里范围: 0-50 kcal
-    - MIDI 范围: 21-108
+    - 卡路里范围: 0~100
+    - MIDI 范围: 21~108 (A0 ~ C8)
     """
-    midi_note = int(21 + (calories / 50) * (108 - 21))
-    return min(max(midi_note, 21), 108)  # 限制范围在 21-108
+    midi_note = int(21 + (calories / 100) * (108 - 21))
+    return min(max(midi_note, 21), 108)  # 限制范围在 [21, 108]
 
 def send_midi():
     """
-    定时发送 MIDI 数据。
-    根据 current_interval 调整发送速度。
+    在单独线程中定时发送 MIDI 数据。
+    根据 current_interval 调整发送速度（睡眠时间）。
     """
-    global current_interval, root_note, running, last_note
+    global running, current_calories, root_note, last_note
     while running:
-        if total_calories == 0:
-            time.sleep(0.1)  # 等待卡路里堆叠数据
-            continue
-
-        # 计算当前属七和弦音符
+        # 这里不再判断 current_calories == 0
+        # 如果你希望 0 时不发音，可自行加逻辑
         chord_notes = [root_note + offset for offset in dominant_seventh_offsets]
 
-        # 随机选择一个音符发送，避免连续两次选择同一个音
+        # 随机选择一个音符发送
         available_notes = [note for note in chord_notes if note != last_note]
-        if not available_notes:  # 如果所有音符都用过，则重置
+        if not available_notes:
             available_notes = chord_notes
         note_to_send = random.choice(available_notes)
-        last_note = note_to_send  # 更新上一次发送的音符
+        last_note = note_to_send
 
         # 发送到 Ableton
         client.send_message("/counter", note_to_send)
-        print(f"Sent MIDI Note: {note_to_send}")
+        print(f"Sent MIDI Note: {note_to_send} (cal: {current_calories}, interval: {current_interval:.2f}s)")
 
-        time.sleep(current_interval)  # 等待下一次播放
+        time.sleep(current_interval)
 
 # 启动线程发送 MIDI 数据
 midi_thread = threading.Thread(target=send_midi)
@@ -479,25 +485,36 @@ try:
         message = data.decode('utf-8')
         print(f"Received message: {message} from {addr}")
 
-        # 解析卡路里数据并更新累计值
+        # 解析卡路里数据并更新当前值
         if message.startswith("/counter,"):
             try:
                 calories = float(message.split(",")[1])
-                total_calories += calories
-                print(f"Total Calories Burned: {total_calories} kcal")
+                current_calories = calories
+                print(f"Current Calories: {current_calories} kcal")
 
-                # 计算新的 MIDI 音符和间隔
-                root_note = map_calories_to_midi(total_calories)
-                current_interval = max(0.1, 0.5 / total_calories)  # 限制最小间隔 0.1 秒
-                print(f"Updated interval: {current_interval} seconds, root note: {root_note}")
+                # (1) 计算原始的目标间隔
+                target_interval = 5.0 / (current_calories + 1)
+
+                # (2) 用指数平滑让间隔更柔和
+                # 注意，这里直接用全局的 smooth_interval / current_interval，
+                # 不要再写 global，否则报 SyntaxError
+                smooth_interval = (1 - ALPHA) * smooth_interval + ALPHA * target_interval
+                # 限制最小间隔 0.1s
+                current_interval = max(0.1, smooth_interval)
+
+                # (3) 更新根音
+                root_note = map_calories_to_midi(current_calories)
+
+                print(f"Updated interval: {current_interval:.2f}s, root note: {root_note}")
+
             except ValueError:
                 print("Invalid calorie data")
+
 except KeyboardInterrupt:
     print("Stopping...")
     running = False
     midi_thread.join()
     receive_sock.close()
-
 ```
 
 最后再次回到Ableton Live的OSC功能，可参考 Demo1 的操作思路。
