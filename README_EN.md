@@ -84,7 +84,7 @@ This Demo uses macOS as an example to demonstrate how to transfer camera data, m
 - **Network Configuration:**
 
   - Local IP Address: 127.0.0.1 (local device communication).
-  - UDP Port: 9000 (ensure Ableton listens on the same port).
+  - UDP Port: 8000 (Ensure that the listening port of the Ableton track plugin matches).
 
 ### **4.2 Camera Data Mapping:**
 
@@ -201,7 +201,7 @@ import random
 
 # Configure OSC Client
 LOCAL_IP = "127.0.0.1"  # Local loopback address
-LOCAL_PORT = 8000       # Port for Ableton
+LOCAL_PORT = 8000       # OSC receiving port, Set the OSC receiving port to a different value to run simultaneously with other scripts and map to different Ableton tracks
 client = SimpleUDPClient(LOCAL_IP, LOCAL_PORT)
 
 # Screen Dimensions (Adjust to your screen resolution)
