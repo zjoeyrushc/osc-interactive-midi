@@ -297,55 +297,191 @@ import Network
 
 class HealthKitManager: ObservableObject {
     let healthStore = HKHealthStore()
-    @Published var latestCaloriesBurned: Double = 0.0
-
-   private var connection: NWConnection?
-   private let oscHost = "192.168.1.142" // Please replace with your local machine's IP address.
-   private let oscPort: UInt16 = 8000    // Please replace with your target port.
+    
+    // We only track the cumulative value for the current session
+    @Published var sessionCalories: Double = 0.0
+    
+    private var sessionStartTime: Date?
+    private var lastSentCalories: Double? // The last sent calorie value, nil means no data has been sent yet
+    
+    // UDP-related
+    private var connection: NWConnection?
+    private let oscHost = "192.168.66.235" // Modify the IP address as per your requirement
+    private let oscPort: UInt16 = 8000
+    
+    // Timer
+    private var timer: Timer?
 
     init() {
         setupConnection()
     }
 
     func setupConnection() {
-        connection = NWConnection(host: NWEndpoint.Host(oscHost), port: NWEndpoint.Port(rawValue: oscPort)!, using: .udp)
+        connection = NWConnection(
+            host: NWEndpoint.Host(oscHost),
+            port: NWEndpoint.Port(rawValue: oscPort)!,
+            using: .udp
+        )
+        connection?.stateUpdateHandler = { state in
+            switch state {
+            case .ready:
+                print("Connection ready on \(self.oscHost):\(self.oscPort)")
+            case .failed(let error):
+                print("Connection failed: \(error.localizedDescription)")
+            default:
+                break
+            }
+        }
         connection?.start(queue: .main)
     }
 
+    // --------------------------------------
+    // MARK: - Request Authorization
+    // --------------------------------------
     func requestAuthorization() {
-        guard HKHealthStore.isHealthDataAvailable() else { return }
-        let energyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
-        healthStore.requestAuthorization(toShare: nil, read: [energyType]) { success, _ in
+        guard HKHealthStore.isHealthDataAvailable() else {
+            print("HealthKit not available on this device")
+            return
+        }
+        
+        let activeEnergyBurnedType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
+        let typesToRead: Set<HKObjectType> = [activeEnergyBurnedType]
+        
+        healthStore.requestAuthorization(toShare: nil, read: typesToRead) { success, error in
             if success {
-                self.startCaloriesQuery()
+                print("HealthKit authorization granted")
+            } else {
+                print("Authorization failed: \(error?.localizedDescription ?? "Unknown error")")
             }
         }
     }
-
-    func startCaloriesQuery() {
-        let energyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
-        let query = HKObserverQuery(sampleType: energyType, predicate: nil) { _, _, _ in
-            self.fetchLatestCaloriesBurned()
+    
+    // --------------------------------------
+    // MARK: - Start Session: Record Start Point & Start Monitoring
+    // --------------------------------------
+    func startSession() {
+        sessionStartTime = Date()  // Start tracking from now
+        sessionCalories = 0.0      // Reset
+        lastSentCalories = nil     // Reset the last sent value
+        
+        // Start Observer Query
+        startObserverQuery()
+        
+        // Start a timer to fetch data every 5 seconds as a fallback
+        timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
+            guard let self = self, let startTime = self.sessionStartTime else { return }
+            
+            self.fetchAccumulatedCalories(since: startTime) { value in
+                print("Periodic fetch: \(value) kcal")
+            }
         }
+    }
+    
+    func stopSession() {
+        timer?.invalidate()
+        timer = nil
+        sessionStartTime = nil
+    }
+
+    // --------------------------------------
+    // MARK: - Observer Query: Listen for underlying data write events
+    // --------------------------------------
+    private func startObserverQuery() {
+        let activeEnergyBurnedType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
+        let query = HKObserverQuery(sampleType: activeEnergyBurnedType, predicate: nil) { [weak self] _, completionHandler, error in
+            if let error = error {
+                print("Observer query error: \(error.localizedDescription)")
+                return
+            }
+
+            guard let self = self, let startTime = self.sessionStartTime else { return }
+            
+            // Trigger data update
+            self.fetchAccumulatedCalories(since: startTime) { value in
+                print("Observer fetch: \(value) kcal")
+            }
+            
+            completionHandler() // Notify the system that the observer has completed processing
+        }
+        
         healthStore.execute(query)
     }
 
-    func fetchLatestCaloriesBurned() {
-        let energyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!
-        let query = HKSampleQuery(sampleType: energyType, predicate: nil, limit: 1, sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)]) { _, results, _ in
-            guard let sample = results?.first as? HKQuantitySample else { return }
+    // --------------------------------------
+    // MARK: - Query: From a custom start point to now
+    // --------------------------------------
+    func fetchAccumulatedCalories(since startTime: Date, completion: @escaping (Double) -> Void) {
+        let now = Date()
+        
+        let predicate = HKQuery.predicateForSamples(
+            withStart: startTime,
+            end: now,
+            options: .strictStartDate
+        )
+        
+        let activeEnergyBurnedType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!
+        let query = HKStatisticsQuery(
+            quantityType: activeEnergyBurnedType,
+            quantitySamplePredicate: predicate,
+            options: .cumulativeSum
+        ) { _, result, error in
+            
+            // If result or sumQuantity() is nil, set calories to 0
+            let kcalValue: Double
+            if let result = result, let sum = result.sumQuantity() {
+                kcalValue = sum.doubleValue(for: .kilocalorie())
+            } else {
+                kcalValue = 0
+            }
+            
             DispatchQueue.main.async {
-                self.latestCaloriesBurned = sample.quantity.doubleValue(for: .kilocalorie())
-                self.sendCaloriesToOSC(self.latestCaloriesBurned)
+                self.sessionCalories = kcalValue
+
+                // ----------------------------------------
+                // Force sending data when calories are 0,
+                // For non-zero values, send only if it changes or it's the first time
+                // ----------------------------------------
+                if kcalValue == 0 {
+                    print("===> [Always send 0] lastSentCalories: \(String(describing: self.lastSentCalories)), current: \(kcalValue)")
+                    self.sendCaloriesToOSC(kcalValue)
+                    self.lastSentCalories = kcalValue
+                } else if self.lastSentCalories == nil || kcalValue != self.lastSentCalories {
+                    print("===> [Send changed value] lastSentCalories: \(String(describing: self.lastSentCalories)), current: \(kcalValue)")
+                    self.sendCaloriesToOSC(kcalValue)
+                    self.lastSentCalories = kcalValue
+                } else {
+                    print("===> [No send] lastSentCalories: \(String(describing: self.lastSentCalories)), current: \(kcalValue)")
+                }
+                
+                completion(kcalValue)
             }
         }
+        
         healthStore.execute(query)
     }
-
+    
+    // --------------------------------------
+    // MARK: - Send Data to Python (OSC)
+    // --------------------------------------
     func sendCaloriesToOSC(_ calories: Double) {
-        guard let connection = connection else { return }
-        let message = "/counter,\(calories)"
-        connection.send(content: message.data(using: .utf8), completion: .contentProcessed { _ in })
+        guard let connection = connection else {
+            print("Connection not established")
+            return
+        }
+
+        let oscMessage = "/counter,\(calories)"
+        guard let messageData = oscMessage.data(using: .utf8) else {
+            print("Failed to encode OSC message")
+            return
+        }
+
+        connection.send(content: messageData, completion: .contentProcessed { error in
+            if let error = error {
+                print("Failed to send OSC message: \(error.localizedDescription)")
+            } else {
+                print("Sent session-based kcal to OSC: \(oscMessage)")
+            }
+        })
     }
 }
 ```
@@ -358,24 +494,61 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var healthKitManager = HealthKitManager()
+    @State private var isSessionActive = false // Indicates whether the session is currently active
 
     var body: some View {
-        VStack {
-            Text("Calories Burned")
+        VStack(spacing: 20) {
+            Text("Workout Session")
                 .font(.largeTitle)
-
-            Text("\(healthKitManager.latestCaloriesBurned, specifier: "%.2f") kcal")
                 .padding()
 
-            Button("Request Authorization") {
-                healthKitManager.requestAuthorization()
+            // Display the cumulative calories burned during the current session
+            Text("Session Calories Burned: \(healthKitManager.sessionCalories, specifier: "%.2f") kcal")
+                .padding()
+                .font(.title2)
+
+            HStack(spacing: 20) {
+                // Start session button
+                Button(action: {
+                    if !isSessionActive {
+                        healthKitManager.requestAuthorization()
+                        healthKitManager.startSession()
+                        isSessionActive = true
+                    }
+                }) {
+                    Text("Start Session")
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(isSessionActive ? Color.gray : Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .disabled(isSessionActive) // Prevent starting a session multiple times
+
+                // Stop session button
+                Button(action: {
+                    if isSessionActive {
+                        healthKitManager.stopSession()
+                        isSessionActive = false
+                    }
+                }) {
+                    Text("Stop Session")
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(isSessionActive ? Color.red : Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .disabled(!isSessionActive) // Only enabled when a session is active
             }
             .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(10)
+
+            Spacer()
         }
         .padding()
+        .onChange(of: healthKitManager.sessionCalories) { newValue in
+            print("Session Calories updated: \(newValue)")
+        }
     }
 }
 ```
@@ -387,108 +560,109 @@ struct ContentView: View {
 
 - **Data Reception**
 
-  - **Method:** Use Python's Socket module to set up a UDP server that listens on port 8000 and receives calorie data from Swift.
+  - **Method:** Python uses the `socket` module to set up a UDP server, listening on port 8000, to receive calorie data from the Swift client.
 
-  - **Message Format:** Swift sends messages via the OSC protocol in the format `/counter,\<calories>`, which Python parses to extract calorie values.
+  - **Message Format:** The Swift client sends messages in OSC protocol format as `/counter,\<calories>`, which Python parses to extract calorie values.
 
-  - **Components Involved:**
-    `socket` is used to receive health data and establish a UDP server for data streaming.
+  - **Components Involved:** 
+    `socket` is used to receive health data, establishing a server to listen for data streams over the UDP protocol.
 
 - **Data Transmission**
 
+  - Using PythonOSC, the received data is forwarded to a specified target port (default example: Ableton Live's port 9000 with OSC path `/counter`), laying the groundwork for MIDI mapping.
 
-  - Use PythonOSC to forward the received data to the specified target port (default example is Ableton Live's port 9000, OSC path `/counter`), creating prerequisites for MIDI mapping.
-
-  - **Target Address:** Default to the local loopback address (127.0.0.1), but it can be freely defined for cross-device or network transmission as needed.
+  - **Target Address:** The default is the local loopback address (127.0.0.1), but it can be freely defined for any target address to achieve cross-device or network transmission.
 
   - **Components Involved:**
-    `threading` creates independent threads to send MIDI note data in parallel without blocking the main program.
-    `pythonosc.udp_client` sends OSC messages, transmitting mapped health data to the target device or software (e.g., Ableton Live).
+    `threading` is used to create a separate thread for sending MIDI note data in parallel, ensuring the main program remains unblocked.
+    `pythonosc.udp\_client` sends OSC messages, transmitting the mapped health data to the target device or software (e.g., Ableton Live).
 
 - **Data Mapping:**
-
   - **Components Involved:**
-    `time` controls data transmission frequency, e.g., generating specified playback intervals for MIDI data.
-    `random` generates random MIDI notes, randomly selecting from dominant seventh chord and avoid repetitive notes.
-    **More calories burned correspond to higher notes, and notes are played more densely, reflecting dynamic changes in activity.**
+    `time` controls the data sending frequency, dynamically adjusting the interval using an exponential smoothing algorithm to ensure a smoother frequency transition reflecting calorie changes.
+    `random` generates random MIDI notes by selecting from the dominant seventh chord while avoiding repeated notes.
+     **Higher calorie consumption corresponds to higher notes, and the playback frequency becomes more intense to reflect dynamic activity levels.**
 
-  - **Calorie-to-MIDI Note Mapping:**
-
-    - Calorie Range: [0, 5] kcal.
+  - **Calorie to MIDI Note Mapping:**
+    - Calorie Range: [0, 100] kcal.
     - MIDI Note Range: [21 (A0), 108 (C8)].
-    - Mapping Formula: `midi_note = int(21 + (calories / 5) * (108 - 21))`.
+    - Mapping Formula: `midi_note = int(21 + (calories / 100) * (108 - 21))`.
 
-  - **Interval Mapping:**
-
-    - Calorie Range: [0, 50] kcal.
-    - Interval Range: [0.1, 1.0] seconds.
-    - Mapping Formula: `interval = max(0.1, 0.5 / calories)`.
-
-- **Sample Code: [Receive_Calories_Burned.py](./osc_midi_scripts/Receive_Calories_Burned.py)
-
+  - **Time Interval Mapping:**
+    - Initial Time Interval: 5 seconds.
+    - Exponential Smoothing Formula: `smooth_interval = (1 - ALPHA) * smooth_interval + ALPHA * (5.0 / (calories + 1))`.
+    - Limitation: `interval = max(0.1, smooth_interval)`.
+   
+    
 ```python
 import socket
 import threading
 from pythonosc.udp_client import SimpleUDPClient
 import time
-import random  # Used for random note selection
+import random  # Used to randomly select a MIDI note
 
+# -----------------------
+# Global Variables
+# -----------------------
+running = True                # Controls the thread's running state
+current_calories = 0.0        # Current calorie value
+root_note = 21                # Initial note (Lowest note A0 on Grand Piano)
+last_note = None              # Tracks the last sent note to avoid repetition
+
+# Note interval related: initial interval 5s, using exponential smoothing
+smooth_interval = 5.0         # Temporary variable for smoothing
+current_interval = 5.0        # Actual interval for controlling note sending
+ALPHA = 0.1                   # Smoothing factor (0~1, smaller means smoother)
+
+# Dominant seventh chord offsets (Root, Major third, Perfect fifth, Minor seventh)
+dominant_seventh_offsets = [0, 4, 7, 10]
+
+# -----------------------
+# Socket Configuration
+# -----------------------
 # Set up a socket to receive calorie data
 receive_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 receive_sock.bind(("0.0.0.0", 8000))  # Listen on port 8000
 
-# Set up Ableton's OSC client
+# Set up an OSC client for Ableton
 ABLETON_IP = "127.0.0.1"  # Local loopback address
-ABLETON_PORT = 9000       # Ableton's OSC receiving port
+ABLETON_PORT = 9000       # Port used by Ableton to receive OSC messages
 client = SimpleUDPClient(ABLETON_IP, ABLETON_PORT)
-
-# Global variables
-total_calories = 0.0  # Total calorie consumption
-current_interval = 1.0  # Default note interval: 1 second
-root_note = 21  # Initial note (lowest note of Grand Piano, A0)
-running = True  # Controls the thread running state
-last_note = None  # Records the last sent note to avoid repetition
-
-# Dominant seventh chord offsets
-dominant_seventh_offsets = [0, 4, 7, 10]  # Root, major third, perfect fifth, minor seventh
 
 def map_calories_to_midi(calories):
     """
-    Map calorie values to the MIDI note range of a Grand Piano.
-    - Calorie range: 0-50 kcal
-    - MIDI range: 21-108
+    Map calorie values to MIDI notes in the Grand Piano range.
+    - Calorie range: 0~100
+    - MIDI range: 21~108 (A0 ~ C8)
     """
-    midi_note = int(21 + (calories / 50) * (108 - 21))
-    return min(max(midi_note, 21), 108)  # Limit range to 21-108
+    midi_note = int(21 + (calories / 100) * (108 - 21))
+    return min(max(midi_note, 21), 108)  # Limit range to [21, 108]
 
 def send_midi():
     """
-    Send MIDI data at regular intervals.
-    Adjust the sending speed based on current_interval.
+    Send MIDI data periodically in a separate thread.
+    Adjust sending speed based on current_interval (sleep time).
     """
-    global current_interval, root_note, running, last_note
+    global running, current_calories, root_note, last_note
     while running:
-        if total_calories == 0:
-            time.sleep(0.1)  # Wait for calorie data to accumulate
-            continue
-
-        # Calculate current dominant seventh chord notes
+        # Here, current_calories == 0 is no longer checked
+        # Add logic if you want to mute when calories are 0
         chord_notes = [root_note + offset for offset in dominant_seventh_offsets]
 
-        # Randomly select a note to send, avoiding consecutive repetition of the same note
+        # Randomly select a note to send
         available_notes = [note for note in chord_notes if note != last_note]
-        if not available_notes:  # If all notes are used, reset
+        if not available_notes:
             available_notes = chord_notes
         note_to_send = random.choice(available_notes)
-        last_note = note_to_send  # Update the last sent note
+        last_note = note_to_send
 
         # Send to Ableton
         client.send_message("/counter", note_to_send)
-        print(f"Sent MIDI Note: {note_to_send}")
+        print(f"Sent MIDI Note: {note_to_send} (cal: {current_calories}, interval: {current_interval:.2f}s)")
 
-        time.sleep(current_interval)  # Wait for the next playback
+        time.sleep(current_interval)
 
-# Start a thread to send MIDI data
+# Start thread to send MIDI data
 midi_thread = threading.Thread(target=send_midi)
 midi_thread.start()
 
@@ -501,19 +675,31 @@ try:
         message = data.decode('utf-8')
         print(f"Received message: {message} from {addr}")
 
-        # Parse calorie data and update total value
+        # Parse calorie data and update current value
         if message.startswith("/counter,"):
             try:
                 calories = float(message.split(",")[1])
-                total_calories += calories
-                print(f"Total Calories Burned: {total_calories} kcal")
+                current_calories = calories
+                print(f"Current Calories: {current_calories} kcal")
 
-                # Calculate new MIDI note and interval
-                root_note = map_calories_to_midi(total_calories)
-                current_interval = max(0.1, 0.5 / total_calories)  # Limit minimum interval to 0.1 seconds
-                print(f"Updated interval: {current_interval} seconds, root note: {root_note}")
+                # (1) Calculate the target interval
+                target_interval = 5.0 / (current_calories + 1)
+
+                # (2) Apply exponential smoothing to make the interval smoother
+                # Note: Directly use global smooth_interval / current_interval here,
+                # no need for global declaration to avoid SyntaxError
+                smooth_interval = (1 - ALPHA) * smooth_interval + ALPHA * target_interval
+                # Ensure the minimum interval is 0.1s
+                current_interval = max(0.1, smooth_interval)
+
+                # (3) Update root note
+                root_note = map_calories_to_midi(current_calories)
+
+                print(f"Updated interval: {current_interval:.2f}s, root note: {root_note}")
+
             except ValueError:
                 print("Invalid calorie data")
+
 except KeyboardInterrupt:
     print("Stopping...")
     running = False
