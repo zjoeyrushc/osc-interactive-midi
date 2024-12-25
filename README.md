@@ -73,7 +73,7 @@ pip install pynput
 
 - **网络配置：**
   - 本地 IP 地址：127.0.0.1（本地设备通信）。
-  - UDP 端口：9000（确保 Ableton 监听相同端口）。
+  - UDP 端口：8000（确保 Ableton 轨道插件的监听端口相同即可）。
 
 
 ### **4.2 摄像头数据映射：**
@@ -187,7 +187,7 @@ import random
 
 # 配置 OSC 客户端
 LOCAL_IP = "127.0.0.1"  # 本地回环地址
-LOCAL_PORT = 8000       # 发送到 Ableton 的端口
+LOCAL_PORT = 7000       # OSC 接收端口，与其他脚本设为不同可同时运行，映射不同的 Ableton轨道
 client = SimpleUDPClient(LOCAL_IP, LOCAL_PORT)
 
 # 屏幕的宽高（根据你的屏幕分辨率调整）
