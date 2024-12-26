@@ -1,4 +1,4 @@
-# OSC Interactive Music: Real-Time Data MIDI Mapping
+a# OSC Interactive Music: Real-Time Data MIDI Mapping
 
 [中文版](./README.md)
 
@@ -35,12 +35,7 @@ This Demo uses macOS as an example to demonstrate how to transfer camera data, m
   - **Setup**: Run the following commands to install the required Python dependencies.
 
     ```python
-
-    pip install opencv-python
-
-    pip install python-osc
-
-    pip install pynput
+python3 -m pip install opencv-python python-osc pynput
     
     # - opencv-python: For processing camera data and video analysis.
     # - python-osc: For transmitting OSC messages to other software.
