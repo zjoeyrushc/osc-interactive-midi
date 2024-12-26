@@ -33,9 +33,7 @@
 
    - **准备**：执行以下命令安装本次的 Python 依赖。
 ```python
-pip install opencv-python
-pip install python-osc
-pip install pynput
+python3 -m pip install opencv-python python-osc pynput
 ```
 
 
