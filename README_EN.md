@@ -34,9 +34,9 @@ This Demo uses macOS as an example to demonstrate how to transfer camera data, m
 
   - **Setup**: Run the following commands to install the required Python dependencies.
 
-    ```
+```
   python3 -m pip install opencv-python python-osc pynput
-    ```
+```
   
 
 - **HealthKit + Xcode (Optional)**: Build a bridging application with Xcode to collect motion data from Apple Watch using the HealthKit component and send the data to a Python receiver for additional data-driven functionality.
