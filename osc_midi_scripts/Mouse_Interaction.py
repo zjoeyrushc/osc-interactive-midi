@@ -4,7 +4,7 @@ import random
 
 # 配置 OSC 客户端
 LOCAL_IP = "127.0.0.1"  # 本地回环地址
-LOCAL_PORT = 8000       # 发送到 Ableton 的端口
+LOCAL_PORT = 7000       # OSC 接收端口，与其他脚本设为不同可同时运行，映射不同的 Ableton轨道
 client = SimpleUDPClient(LOCAL_IP, LOCAL_PORT)
 
 # 屏幕的宽高（根据你的屏幕分辨率调整）
@@ -15,8 +15,8 @@ SCREEN_HEIGHT = 1080
 def on_move(x, y):
     # 将鼠标的 X 坐标映射为 MIDI 音符编号 (0–127)
     note = int((x / SCREEN_WIDTH) * 127)
-    # 发送 OSC 消息到 /mouse_position
-    client.send_message("/mouse_position", note)
+    # 发送 OSC 消息到 /counter
+    client.send_message("/counter", note)
     print(f"Mouse moved to ({x}, {y}) -> Note: {note}")
 
 # 回调函数：鼠标点击
