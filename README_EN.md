@@ -34,11 +34,8 @@ This Demo uses macOS as an example to demonstrate how to transfer camera data, m
 
   - **Setup**: Run the following commands to install the required Python dependencies.
 
-    ```python
-  python3 -m pip install opencv-python python-osc pynput  
-    # - opencv-python: For processing camera data and video analysis.
-    # - python-osc: For transmitting OSC messages to other software.
-    # - pynput: For capturing mouse input events.
+    ```
+  python3 -m pip install opencv-python python-osc pynput
     ```
   
 
