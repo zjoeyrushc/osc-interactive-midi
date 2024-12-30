@@ -474,6 +474,16 @@ class HealthKitManager: ObservableObject {
             }
         })
     }
+    // --------------------------------------
+    // MARK: - Add kcal Manually（For testing）
+    // --------------------------------------
+    func addManualCalories(_ calories: Double) {
+        DispatchQueue.main.async {
+            self.sessionCalories += calories
+            self.sendCaloriesToOSC(self.sessionCalories)
+            print("Manually added \(calories) kcal. New sessionCalories: \(self.sessionCalories)")
+        }
+    }
 }
 ```
 
