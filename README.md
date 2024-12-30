@@ -464,6 +464,26 @@ class HealthKitManager: ObservableObject {
             }
         })
     }
+       // 手动增加 1 kcal 的按钮
+            Button(action: {
+                healthKitManager.addManualCalories(1.0)
+            }) {
+                Text("Manually Add 1 kcal")
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .padding()
+
+            Spacer()
+        }
+        .padding()
+        .onChange(of: healthKitManager.sessionCalories) { newValue in
+            print("Session Calories updated: \(newValue)")
+        }
+    }
 }
 
 ```
