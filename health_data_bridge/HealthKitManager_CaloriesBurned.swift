@@ -13,8 +13,8 @@ class HealthKitManager: ObservableObject {
     
     // UDP 相关
     private var connection: NWConnection?
-    private let oscHost = "192.168.66.235" // 根据你的需求修改 IP
-    private let oscPort: UInt16 = 8000
+    private let oscHost = "192.168.50.192" // 根据你的需求修改 IP
+    private let oscPort: UInt16 = 9000
     
     // 定时器
     private var timer: Timer?
@@ -190,4 +190,15 @@ class HealthKitManager: ObservableObject {
             }
         })
     }
+    // --------------------------------------
+    // MARK: - 手动增加 kcal
+    // --------------------------------------
+    func addManualCalories(_ calories: Double) {
+        DispatchQueue.main.async {
+            self.sessionCalories += calories
+            self.sendCaloriesToOSC(self.sessionCalories)
+            print("Manually added \(calories) kcal. New sessionCalories: \(self.sessionCalories)")
+        }
+    }
 }
+
