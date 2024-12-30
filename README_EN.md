@@ -495,7 +495,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var healthKitManager = HealthKitManager()
-    @State private var isSessionActive = false // Indicates whether the session is currently active
+    @State private var isSessionActive = false // Flag to indicate whether the session is active
 
     var body: some View {
         VStack(spacing: 20) {
@@ -503,7 +503,7 @@ struct ContentView: View {
                 .font(.largeTitle)
                 .padding()
 
-            // Display the cumulative calories burned during the current session
+            // Display the total calories burned during the current session
             Text("Session Calories Burned: \(healthKitManager.sessionCalories, specifier: "%.2f") kcal")
                 .padding()
                 .font(.title2)
@@ -524,7 +524,7 @@ struct ContentView: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
-                .disabled(isSessionActive) // Prevent starting a session multiple times
+                .disabled(isSessionActive) // Prevent starting the session multiple times
 
                 // Stop session button
                 Button(action: {
@@ -540,7 +540,20 @@ struct ContentView: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
-                .disabled(!isSessionActive) // Only enabled when a session is active
+                .disabled(!isSessionActive) // Only enabled when the session is active
+            }
+            .padding()
+
+            // Button to manually add 1 kcal
+            Button(action: {
+                healthKitManager.addManualCalories(1.0)
+            }) {
+                Text("Manually Add 1 kcal")
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
             }
             .padding()
 
