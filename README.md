@@ -287,8 +287,8 @@ class HealthKitManager: ObservableObject {
     
     // UDP 相关
     private var connection: NWConnection?
-    private let oscHost = "192.168.66.235" // 根据你的需求修改 IP
-    private let oscPort: UInt16 = 8000
+    private let oscHost = "192.168.50.192" // 根据你的需求修改 IP
+    private let oscPort: UInt16 = 9000
     
     // 定时器
     private var timer: Timer?
@@ -464,27 +464,18 @@ class HealthKitManager: ObservableObject {
             }
         })
     }
-       // 手动增加 1 kcal 的按钮
-            Button(action: {
-                healthKitManager.addManualCalories(1.0)
-            }) {
-                Text("Manually Add 1 kcal")
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .padding()
-
-            Spacer()
-        }
-        .padding()
-        .onChange(of: healthKitManager.sessionCalories) { newValue in
-            print("Session Calories updated: \(newValue)")
+    // --------------------------------------
+    // MARK: - 手动增加 kcal
+    // --------------------------------------
+    func addManualCalories(_ calories: Double) {
+        DispatchQueue.main.async {
+            self.sessionCalories += calories
+            self.sendCaloriesToOSC(self.sessionCalories)
+            print("Manually added \(calories) kcal. New sessionCalories: \(self.sessionCalories)")
         }
     }
 }
+
 
 ```
 
@@ -542,6 +533,19 @@ struct ContentView: View {
                         .cornerRadius(10)
                 }
                 .disabled(!isSessionActive) // 仅在会话进行中可用
+            }
+            .padding()
+
+            // 手动增加 1 kcal 的按钮
+            Button(action: {
+                healthKitManager.addManualCalories(1.0)
+            }) {
+                Text("Manually Add 1 kcal")
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
             }
             .padding()
 
