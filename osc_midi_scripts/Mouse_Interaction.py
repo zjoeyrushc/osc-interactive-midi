@@ -4,7 +4,7 @@ import random
 
 # 配置 OSC 客户端
 LOCAL_IP = "127.0.0.1"  # 本地回环地址
-LOCAL_PORT = 7000       # OSC 接收端口，与其他脚本设为不同可同时运行，映射不同的 Ableton轨道
+LOCAL_PORT = 8000       # OSC 接收端口
 client = SimpleUDPClient(LOCAL_IP, LOCAL_PORT)
 
 # 屏幕的宽高（根据你的屏幕分辨率调整）
