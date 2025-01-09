@@ -185,7 +185,7 @@ import random
 
 # 配置 OSC 客户端
 LOCAL_IP = "127.0.0.1"  # 本地回环地址
-LOCAL_PORT = 7000       # OSC 接收端口，与其他脚本设为不同可同时运行，映射不同的 Ableton轨道
+LOCAL_PORT = 8000       # OSC 接收端口，与其他脚本设为不同可同时运行，映射不同的 Ableton轨道
 client = SimpleUDPClient(LOCAL_IP, LOCAL_PORT)
 
 # 屏幕的宽高（根据你的屏幕分辨率调整）
@@ -628,11 +628,11 @@ dominant_seventh_offsets = [0, 4, 7, 10]
 # -----------------------
 # 设置接收卡路里数据的 Socket
 receive_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-receive_sock.bind(("0.0.0.0", 8000))  # 监听 8000 端口
+receive_sock.bind(("0.0.0.0", 8000))  # 监听 9000 端口
 
 # 设置 Ableton 的 OSC 客户端
 ABLETON_IP = "127.0.0.1"  # 本地回环地址
-ABLETON_PORT = 9000       # Ableton 接收 OSC 的端口
+ABLETON_PORT = 8000       # Ableton 接收 OSC 的端口
 client = SimpleUDPClient(ABLETON_IP, ABLETON_PORT)
 
 def map_calories_to_midi(calories):
