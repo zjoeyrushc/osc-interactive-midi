@@ -215,19 +215,60 @@ with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
 ```
 
 
-### **4.4 Ableton Live MIDI生成（摄像头信息生成宇宙音效为例）：**
+### **4.4 Ableton Live 实操实例：**
 
-- **OSC接收与配置：** 使用 Max for Live 的 OSC Receiver 插件设置监听地址和端口，将 Python 发送的数据接入 Ableton。
+**1. 启动摄像头数据采集**  
+在终端中运行 Python 脚本：  
+```bash
+python3 Receive_Camera_Data.py
+```
 
-- **OSC到MIDI的插件**： 使用 Max for Live 中的自定义 MIDI Effect 插件，将 OSC 参数直接转换为 MIDI Note 或其他动态参数值。例如：
-  根据 OSC 数据范围 [0, 127]，生成 MIDI Note 并限制在指定音阶内（如 C 大调）。
-  可利用Midi Effects的各种功能完善音乐性，如用 Scale 功能确保音符符合音乐调性。
+**2. 关于摄像头调用**  
+调用默认摄像头（编号为0），本案例为 iphone 摄像头：  
+```python
+import cv2
+cap = cv2.VideoCapture(1)  # 0为默认摄像头编号
+```
+**Tip:可以进入 Mac 的 FaceTime 调整摄像头，然后关闭，以方便地更改系统的默认摄像头。** 
 
-- **合成器参数映射：** 在确保了音符生成后，可利用 Ableton 的 Map 功能，将其他 OSC 参数映射到目标 MIDI 音符参数或合成器参数上。例如：
-  - **画面亮度**映射至 MIDI 合成器滤波器频率（路径：`/brightness`）。
-  - **鼠标点击**映射至 MIDI 音符强度（路径：`/trigger_event`）。
+**3. 建立摄像头互动的主音色轨道**    
+本案例选择氛围类的 Drone 音色作为主音色，其适合随机生成，容错率高，来源为 Ableton 官方 Pack 的 **Drone Lab**。
 
-通过以上步骤，Ableton Live 能够接收和实时处理 OSC 信号，将多源数据转化为丰富的音乐表现形式。
+**4. 拖拽必要的 Max for Live 插件和 MIDI 乐器**  
+将 Max for Live 的 `OSC Receiver` 和 `OSC to midi` 等 OSC 相关插件拖入轨道。（来源见“3技术栈与依赖安装”）
+
+**5. 在 OSC Receiver 插件中设置参数**   
+- **Port in**中输入 python 目标 IP 的端口（本案例为8000）。  
+- **Path**中输入 python 输出的 OSC 数据的地址。  
+
+**6. 问题排查 Tip:** 若无法接收到数据，可使用 `OSC Monitor` 检查是否成功接收，以及格式和地址是否匹配。
+
+**7. 使用 Map 功能映射参数**    
+- 需要一项将接收的 OSC 数据**自动弹奏**为 MIDI 音符的功能，本案例使用 `OSC to midi` 插件的 **Playing Note** 功能，**之后每次轨道配置都沿用此方法**。
+- 本案例用亮度 `/brightness` 弹奏 midi，并用颜色偏移 `/color_shift` 改变 midi 乐器的一个音色参数，以实现动态音色变化。
+
+**8. 再建立摄像头互动的副音色轨道**  
+重复第 3 至第 7 步的配置操作，或直接复制主音色轨道再调整：  
+- 本案例选择了噪音类音色作为点缀，为默认 midi 乐器 **Xperact**。  
+- 使用运动量 `/motion_intensity` 弹奏 midi，同时用亮度 `/brightness` 控制其音量。  
+
+**9. 启动鼠标数据采集**  
+在终端中运行 Python 脚本：   
+```bash
+python3 Receive_Mouse_Data.py
+```
+
+**10. 建立鼠标互动的音色轨道**  
+重复第 3 至第 7 步的配置操作，或直接复制主音色轨道再调整：  
+- 因为鼠标交互的反馈感较强，需要音阶明确的 midi 乐器，本案例选择了钢琴类音色，为默认 MIDI 乐器 **Grand Piano Pad**。  
+- 使用鼠标位置 `/mouse_position` 弹奏 midi，并通过点击事件 `/trigger_event` 随机控制力度。  
+
+**11. 优化 Tip:**  
+- OSC Reciever 接收的 OSC 数据 `value` 可灵活用 `Max`和 `Min` 调整映射的范围区间。
+- 注意，`OSC to midi` 插件的 `note duration ` 参数对于某些 midi 乐器时，不可设置过短，否则无法出声。
+- 可根据编曲或混音需求添加插件，比如：用 `midi scale` 确保 midi 限制在某个调式范围内;用 `limiter` 避免信号过大引发爆音等等。  
+
+
 
 ---
 
