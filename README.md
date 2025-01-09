@@ -566,7 +566,7 @@ struct ContentView: View {
 
 - **数据接收**
 
-  - **方式：** Python 使用 Socket 模块搭建 UDP 服务器，监听端口 8000，接收来自 Swift 端的卡路里数据。
+  - **方式：** Python 使用 Socket 模块搭建 UDP 服务器，监听端口 9000，接收来自 Swift 端的卡路里数据。
 
   - **消息格式：** Swift 端通过 OSC 协议发送消息，格式为 `/counter,\<calories>`，Python 解析后提取卡路里值。
 
@@ -628,7 +628,7 @@ dominant_seventh_offsets = [0, 4, 7, 10]
 # -----------------------
 # 设置接收卡路里数据的 Socket
 receive_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-receive_sock.bind(("0.0.0.0", 8000))  # 监听 9000 端口
+receive_sock.bind(("0.0.0.0", 9000))  # 监听 9000 端口
 
 # 设置 Ableton 的 OSC 客户端
 ABLETON_IP = "127.0.0.1"  # 本地回环地址
