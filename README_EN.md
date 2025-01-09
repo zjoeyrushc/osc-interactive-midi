@@ -297,7 +297,7 @@ class HealthKitManager: ObservableObject {
     
     // UDP-related
     private var connection: NWConnection?
-    private let oscHost = "192.168.66.235" // Modify the IP address as per your requirement
+    private let oscHost = "192.168.1.142" // Modify the IP address as per your requirement
     private let oscPort: UInt16 = 9000
     
     // Timer
