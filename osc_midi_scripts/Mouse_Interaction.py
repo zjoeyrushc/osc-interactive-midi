@@ -15,8 +15,8 @@ SCREEN_HEIGHT = 1080
 def on_move(x, y):
     # 将鼠标的 X 坐标映射为 MIDI 音符编号 (0–127)
     note = int((x / SCREEN_WIDTH) * 127)
-    # 发送 OSC 消息到 /counter
-    client.send_message("/counter", note)
+    # 发送 OSC 消息到 /mouse_position
+    client.send_message("/mouse_position", note)
     print(f"Mouse moved to ({x}, {y}) -> Note: {note}")
 
 # 回调函数：鼠标点击
