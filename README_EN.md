@@ -221,20 +221,86 @@ with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
     listener.join()
 ```
 
-### **4.4 Ableton Live MIDI Generation:**
+### **4.4 Ableton Live Practical Example:**
 
-- **OSC Reception and Configuration:** Use the Max for Live OSC Receiver plugin to set up the listening address and port, integrating Python-sent data into Ableton.
+![Camera Data Track Configuration 1](instruction_media/camera_data_track_1.png)
 
-- **OSC-to-MIDI Plugin**: Use a custom MIDI Effect plugin in Max for Live to directly convert OSC parameters into MIDI Notes or other dynamic parameter values. For example:
-  Generate MIDI Notes from OSC data range [0, 127] and constrain them to a specified scale (e.g., C Major).
-  Utilize MIDI Effects functionalities like Scale to ensure notes conform to musical tonality.
+**1. Start Camera Data Capture**  
 
-- **Synthesizer Parameter Mapping:** After ensuring note generation, use Ableton's Map function to assign other OSC parameters to target MIDI note parameters or synthesizer parameters. For example:
+Run the Python script in the terminal:  
 
-  - **Frame Brightness** mapped to MIDI synthesizer filter frequency (Path: `/brightness`).
-  - **Mouse Clicks** mapped to MIDI note intensity (Path: `/trigger_event`).
+```bash
+python3 Receive_Camera_Data.py
+```
 
-Through the above steps, Ableton Live can receive and process OSC signals in real time, converting multi-source data into rich musical expressions.
+**2. Camera Configuration**  
+
+Call the default camera (index 0). In this case, it is the iPhone camera:  
+
+```python
+import cv2
+cap = cv2.VideoCapture(1)  # 0 is the default camera index
+```
+**Tip: You can adjust the default camera in Mac's FaceTime settings and then close FaceTime to easily update the system's default camera.** 
+
+**3. Create the Main Audio Track for Camera Interaction**    
+
+For this case, an ambient Drone sound was chosen as the main sound, which is suitable for random generation and has high fault tolerance. The sound comes from the Ableton official pack **Drone Lab**.
+
+**4. Add Required Max for Live Plugins and MIDI Instruments**  
+
+Drag Max for Live plugins like `OSC Receiver` and `OSC to MIDI` into the track. (Refer to “3 Technical Stack and Dependency Installation” for sources)
+
+**5. Configure Parameters in the OSC Receiver Plugin**   
+
+- Enter the target Python IP port in **Port in** (8000 in this case).  
+
+- Enter the OSC data address output from Python in **Path**.  
+
+**6. Troubleshooting Tip:** If no data is received, use `OSC Monitor` to check whether data is successfully received and if the format and address match.
+
+**7. Use the Map Function to Assign Parameters**    
+
+- Ensure there is a function to **automatically play MIDI notes** from received OSC data. In this case, the `OSC to MIDI` plugin's **Playing Note** feature is used, **and this method is consistently applied for subsequent track configurations**.
+
+- In this case, brightness `/brightness` is used to trigger MIDI playback, and color offset `/color_shift` modifies one of the MIDI instrument's sound parameters to create dynamic tonal changes.
+
+![Camera Data Track Configuration 2](instruction_media/camera_data_track_2.png)
+
+**8. Create a Secondary Audio Track for Camera Interaction**  
+
+Repeat steps 3 to 7 for configuration or directly duplicate the main audio track and adjust as needed:  
+
+- For this case, a noise-type sound is chosen as a complementary layer, using the default MIDI instrument **Xperact**.  
+
+- Motion intensity `/motion_intensity` is used to trigger MIDI, while brightness `/brightness` controls its volume.  
+
+![Mouse Data Track Configuration](instruction_media/mouse_data_track.png)
+
+**9. Start Mouse Data Capture**  
+Run the Python script in the terminal:   
+
+```bash
+python3 Receive_Mouse_Data.py
+```
+
+**10. Create an Audio Track for Mouse Interaction**  
+
+Repeat steps 3 to 7 for configuration or directly duplicate the main audio track and adjust as needed:  
+
+- For stronger feedback from mouse interactions, a MIDI instrument with a clear scale is recommended. In this case, the piano sound **Grand Piano Pad** was selected.  
+
+- Mouse position `/mouse_position` triggers MIDI notes, while click events `/trigger_event` randomly control velocity.
+
+
+**11. Optimization Tip:**  
+
+- The OSC data `value` received by `OSC Receiver` can be flexibly adjusted using `Max` and `Min` to define the mapping range.
+
+- Note that the `note duration` parameter in the `OSC to MIDI` plugin should not be set too short for certain MIDI instruments; otherwise, no sound may be produced.
+
+- Add plugins according to composition or mixing needs, such as:  Use `MIDI Scale` to ensure MIDI notes are restricted to a specific scale. Use a `Limiter` to avoid clipping caused by excessive signal levels.
+
 
 ---
 
