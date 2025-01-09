@@ -217,7 +217,7 @@ with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
 
 ### **4.4 Ableton Live 实操实例：**
 
-![配置摄像头数据轨道1](insturction_media/instruction_image_1.png)
+![配置摄像头数据轨道1](instruction_media/instruction_image_1.png)
 
 **1. 启动摄像头数据采集**  
 
