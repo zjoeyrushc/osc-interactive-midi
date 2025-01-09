@@ -1,4 +1,4 @@
-a# OSC Interactive Music: Real-Time Data MIDI Mapping
+# OSC Interactive Music: Real-Time Data MIDI Mapping
 
 [中文版](./README.md)
 
