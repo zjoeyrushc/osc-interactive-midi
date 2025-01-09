@@ -298,7 +298,7 @@ class HealthKitManager: ObservableObject {
     // UDP-related
     private var connection: NWConnection?
     private let oscHost = "192.168.66.235" // Modify the IP address as per your requirement
-    private let oscPort: UInt16 = 8000
+    private let oscPort: UInt16 = 9000
     
     // Timer
     private var timer: Timer?
@@ -636,11 +636,11 @@ dominant_seventh_offsets = [0, 4, 7, 10]
 # -----------------------
 # Set up a socket to receive calorie data
 receive_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-receive_sock.bind(("0.0.0.0", 8000))  # Listen on port 8000
+receive_sock.bind(("0.0.0.0", 9000))  # Listen on port 9000
 
 # Set up an OSC client for Ableton
 ABLETON_IP = "127.0.0.1"  # Local loopback address
-ABLETON_PORT = 9000       # Port used by Ableton to receive OSC messages
+ABLETON_PORT = 8000       # Port used by Ableton to receive OSC messages
 client = SimpleUDPClient(ABLETON_IP, ABLETON_PORT)
 
 def map_calories_to_midi(calories):
