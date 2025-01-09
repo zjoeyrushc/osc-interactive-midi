@@ -574,7 +574,7 @@ struct ContentView: View {
 
 - **Data Reception**
 
-  - **Method:** Python uses the `socket` module to set up a UDP server, listening on port 8000, to receive calorie data from the Swift client.
+  - **Method:** Python uses the `socket` module to set up a UDP server, listening on port 9000, to receive calorie data from the Swift client.
 
   - **Message Format:** The Swift client sends messages in OSC protocol format as `/counter,\<calories>`, which Python parses to extract calorie values.
 
