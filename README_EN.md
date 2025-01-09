@@ -192,7 +192,7 @@ import random
 
 # Configure OSC Client
 LOCAL_IP = "127.0.0.1"  # Local loopback address
-LOCAL_PORT = 8000       # OSC receiving port, Set the OSC receiving port to a different value to run simultaneously with other scripts and map to different Ableton tracks
+LOCAL_PORT = 8000       # OSC receiving port
 client = SimpleUDPClient(LOCAL_IP, LOCAL_PORT)
 
 # Screen Dimensions (Adjust to your screen resolution)
