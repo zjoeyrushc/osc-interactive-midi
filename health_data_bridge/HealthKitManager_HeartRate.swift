@@ -9,7 +9,7 @@ class HealthKitManager: ObservableObject {
     // 创建 UDP 连接
     private var connection: NWConnection?
     private let oscHost = "192.168.1.142" // 本地地址
-    private let oscPort: UInt16 = 8000 // 与 Python 的接收端端口一致
+    private let oscPort: UInt16 = 9000 // 与 Python 的接收端端口一致
 
     init() {
         setupConnection()
