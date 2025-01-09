@@ -223,7 +223,7 @@ with mouse.Listener(on_move=on_move, on_click=on_click) as listener:
 
 ### **4.4 Ableton Live Practical Example:**
 
-![Camera Data Track Configuration 1](instruction_media/camera_data_track_1.png)
+![Camera Data Track Configuration 1](instruction_media/instruction_image_1.png)
 
 **1. Start Camera Data Capture**  
 
@@ -265,7 +265,7 @@ Drag Max for Live plugins like `OSC Receiver` and `OSC to MIDI` into the track. 
 
 - In this case, brightness `/brightness` is used to trigger MIDI playback, and color offset `/color_shift` modifies one of the MIDI instrument's sound parameters to create dynamic tonal changes.
 
-![Camera Data Track Configuration 2](instruction_media/camera_data_track_2.png)
+![Camera Data Track Configuration 2](instruction_media/instruction_image_2.png)
 
 **8. Create a Secondary Audio Track for Camera Interaction**  
 
@@ -275,7 +275,7 @@ Repeat steps 3 to 7 for configuration or directly duplicate the main audio track
 
 - Motion intensity `/motion_intensity` is used to trigger MIDI, while brightness `/brightness` controls its volume.  
 
-![Mouse Data Track Configuration](instruction_media/mouse_data_track.png)
+![Mouse Data Track Configuration](instruction_media/instruction_image_3.png)
 
 **9. Start Mouse Data Capture**  
 Run the Python script in the terminal:   
