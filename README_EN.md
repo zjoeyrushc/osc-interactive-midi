@@ -203,8 +203,8 @@ SCREEN_HEIGHT = 1080
 def on_move(x, y):
     # Map Mouse X Coordinate to MIDI Note Number (0–127)
     note = int((x / SCREEN_WIDTH) * 127)
-    # Send OSC Message to /counter
-    client.send_message("/counter", note)
+    # Send OSC Message to /mouse_position
+    client.send_message("/mouse_position", note)
     print(f"Mouse moved to ({x}, {y}) -> Note: {note}")
 
 # Callback Function: Mouse Click
