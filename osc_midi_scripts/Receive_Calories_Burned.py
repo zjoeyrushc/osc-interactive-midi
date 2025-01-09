@@ -6,11 +6,11 @@ import random  # 用于随机选择音符
 
 # 设置接收卡路里数据的 Socket
 receive_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-receive_sock.bind(("0.0.0.0", 8000))  # 监听 8000 端口
+receive_sock.bind(("0.0.0.0", 9000))  # 监听 9000 端口
 
 # 设置 Ableton 的 OSC 客户端
 ABLETON_IP = "127.0.0.1"  # 本地回环地址
-ABLETON_PORT = 9000       # Ableton 接收 OSC 的端口
+ABLETON_PORT = 8000       # Ableton 接收 OSC 的端口
 client = SimpleUDPClient(ABLETON_IP, ABLETON_PORT)
 
 # 全局变量
