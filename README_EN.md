@@ -55,7 +55,7 @@ This Demo uses macOS as an example to demonstrate how to transfer camera data, m
 
   - **Load Max for Live Plugins**: Below are some example plugins to help you quickly set up OSC data reception and conversion.
 
-    - **[OSC Receiver (OSC In)](https://maxforlive.com/library/device/7752/osc-receiver-osc-in)**: A simple OSC receiver plugin that listens to OSC messages on specified ports.
+    - **[OSC Receiver](https://maxforlive.com/library/device/7752/osc-receiver-osc-in)**: A simple OSC receiver plugin that listens to OSC messages on specified ports.
     - **[Simple OSC to MIDI](https://maxforlive.com/library/device/987/simple-osc-to-midi)**: Maps incoming OSC data to MIDI notes or parameters for real-time music generation.
     - **[Connection Kit](https://github.com/Ableton/m4l-connection-kit)**: An official toolkit from Ableton that includes various OSC and MIDI tools, enabling connections to sensors, controllers, and other devices for more interactive applications.
 
