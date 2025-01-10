@@ -53,7 +53,7 @@ python3 -m pip install opencv-python python-osc pynput
   - **启用 Max for Live**：在 **Preferences > Licenses/Maintenance** 中确保 **Max for Live** 已启用。
 
   - **加载 Max for Live 插件**： 以下是一些示例插件，可以帮助你快速实现 OSC 数据接收和转换。
-    - [**OSC Receiver (OSC In)**](https://maxforlive.com/library/device/7752/osc-receiver-osc-in)：一个简单的 OSC 数据接收插件，用于监听指定端口的 OSC 消息。
+    - [**OSC Receiver**](https://maxforlive.com/library/device/7752/osc-receiver-osc-in)：一个简单的 OSC 数据接收插件，用于监听指定端口的 OSC 消息。
     - [**Simple OSC to MIDI**](https://maxforlive.com/library/device/987/simple-osc-to-midi)：将接收的 OSC 数据映射为 MIDI 音符或参数，用于实时音乐生成。
     - [**Connection Kit**](https://github.com/Ableton/m4l-connection-kit)：Ableton 官方发布的工具包，包含多个 OSC 和 MIDI 工具，可以连接传感器、控制器等多种设备，拓展更多互动应用场景。
    
