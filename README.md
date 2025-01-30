@@ -311,13 +311,13 @@ python3 Receive_Mouse_Data.py
 
   - 在项目设置中启用 HealthKit 框架，确保添加所需权限。通过创建一个`HealthKitManager.swift` 文件完成对健康数据的获取，本 Demo 以获取卡路里数据为例。
 
-  - 授权用户读取健康数据，确保隐私合规性。
+  - 在 Xcode 的 Signing & Capabilities 选项卡中，选择主 Target，点击 ”+” 添加 HealthKit，Xcode 会自动生成 MyApp.entitlements 并添加相应权限。
 
   - 在原始的 `ContentView.swift` 中构建前端界面，显示实时运动数据并触发授权逻辑。
 
    - 将 iPhone 使用数据线连接到 Mac，在 iPhone 上按照提示信任计算机，并在“设置 > 隐私与安全 > 开发者模式”中启用开发者模式。
     打开 Xcode，点击顶部菜单中的“设备和模拟器”（Device and Simulators），确保 iPhone 已正确连接并显示在设备列表中，依据提示完成配置。
-    在 Xcode 的目标设备菜单中选择 iPhone，点击“运行”（Run）按钮，将应用部署到 iPhone 进行测试。
+    在 Xcode 的目标设备菜单中选择 iPhone，点击“运行”（Run）按钮，将应用部署到 iPhone 进行测试，接着在iphone端确认HealthKit授权。
 
    - 运行后就可过 UDP 协议将卡路里数据发送至计划的 Python 模块以供后续处理。
 
