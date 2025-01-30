@@ -316,13 +316,13 @@ Repeat steps 3 to 7 for configuration or directly duplicate the main audio track
 
   - Enable the HealthKit framework in project settings and ensure the necessary permissions are added. Create a `HealthKitManager.swift` file to retrieve calorie data.
 
-  - Authorize users to read health data, ensuring privacy compliance.
+  - In the Signing & Capabilities tab of Xcode, select the main Target, click ”+”, add HealthKit, and Xcode will automatically generate MyApp.entitlements with the required permissions.
 
   - Build the front-end interface in the original `ContentView.swift` to display real-time activity data and trigger authorization logic.
 
   - Connect the iPhone to Mac via a data cable, trust the computer on the iPhone as prompted, and enable Developer Mode under "Settings > Privacy & Security > Developer Mode."
     Open Xcode, click "Device and Simulators" in the top menu, ensure the iPhone is correctly connected and displayed in the device list, and complete the configuration as prompted.
-    Select iPhone in the Xcode target device menu and click "Run" to deploy the app to the iPhone for testing.
+    Select iPhone in the Xcode target device menu and click "Run" to deploy the app to the iPhone for testing. Then, confirm the HealthKit authorization on your iPhone.
 
   - After running, UDP protocol can send calorie data to the planned Python module for subsequent processing.
 
