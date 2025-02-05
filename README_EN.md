@@ -787,6 +787,52 @@ except KeyboardInterrupt:
     receive_sock.close()
 ```
 
-Finally, returning to the OSC functionality in Ableton Live, you can refer to the operational ideas from Demo 1. 
+### **5.3 Ableton Live Practical Example:**
+
+![Configuring Calorie Data Track 1](instruction_media/instruction_image_4.png)
+
+**1. Start Calorie Data Collection and OSC Data Generation Script**  
+
+Run the following Python script in the terminal:  
+
+```
+python3 Receive_Calories_Burned.py
+```
+
+This script will automatically generate sound based on calorie consumption data. As the calories burned increase, it simulates the effect of an accelerated heartbeat as exercise intensity rises:  
+
+- Pitch range: A0 to C8 (MIDI: 21-108)
+
+- Note interval: gradually decreases from 5 seconds to 0.1 seconds  
+
+
+**2. Create the Main Calorie Data Sound Track**    
+
+- Repeat steps 3 to 7 from **4.4** practical example:  
+
+- In this example, we use the Ableton official sound **Heartbeat** as the main sound, mimicking the rhythm of a heartbeat.
+
+![Configuring Calorie Data Track 2](instruction_media/instruction_image_5.png)
+
+**3. Start the Xcode Health Data Sync App**  
+
+Run the health data sync app in Xcode and ensure that the app port is different from the Python script port.  
+(In this case, the Xcode app port is **9000**, and the Python port is **8000**.)
+
+**4. Enable Data Sync Mode on the iPhone**  
+
+Wait for the iPhone to automatically open the app interface, then click `Start Session` to begin data synchronization. Click `Stop Session` to stop the synchronization.
+
+**5. Optional: Start Training Mode on the Apple Watch**  
+
+Although training mode is not required, enabling it can speed up calorie data synchronization.  
+
+![Configuring Calorie Data Track 3](instruction_media/instruction_image_6.png)
+
+**6. Wait for Data Sync to Complete and Accumulate**  
+
+As the calorie data syncs, the pitch range will gradually rise, and the frequency will increase.
+
+Tip: This example also adds a button to manually increase 1 kcal for easier testing.  
 
 
