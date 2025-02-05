@@ -782,5 +782,51 @@ except KeyboardInterrupt:
 ```
 
 
-### **4.4 Ableton Live 实操示例：**
+### **5.3 Ableton Live 实操示例：**
+
+
+![配置卡路里数据轨道1](instruction_media/instruction_image_4.png)
+
+**1. 启动卡路里数据收集及 OSC 数据生成脚本**  
+
+在终端运行以下 Python 脚本：  
+
+```bash
+python3 Receive_Calories_Burned.py
+```
+
+此脚本启动时会自动生成基于卡路里消耗数据的声音。随着卡路里消耗量的增加，模仿运动强度增大时，心跳加速的效果。：  
+
+- 音高范围：A0 到 C8 （MIDI: 21-108）
+
+- 音符间隔：逐步从 5秒减少到 0.1秒  
+
+
+**2. 创建卡路里数据的主音色轨道**    
+
+- 重复**4.4**实操中的 第 3 至第 7 步的配置步骤：  
+- 本示例选择了 Ableton 官方音色 **Heartbeat** 作为主音色，模仿心跳的节奏感。
+
+![配置卡路里数据轨道2](instruction_media/instruction_image_5.png)
+
+**3. 启动 Xcode 健康数据同步应用**  
+
+在 Xcode 上运行健康数据同步应用，并确保应用端口与 Python 脚本端口不一致。  
+（本例中，Xcode 应用端口为 **9000**，Python 端口为 **8000**。）
+
+**4. 在 iPhone 上启用数据同步模式**  
+
+等待iPhone自动打开应用界面，点击 `Start Session` 开始数据同步，点击 `Stop Session` 停止同步。
+
+**5. 可选：在 Apple Watch 上启动训练模式**  
+
+虽然训练模式并非必须，但启用后可以加速卡路里数据的同步。  
+
+![配置卡路里数据轨道3](instruction_media/instruction_image_6.png)
+
+**6. 等待数据同步完成并累积**  
+
+随着卡路里数据同步，音高范围逐步上升，频率加快。
+
+TiP：本示例还增加了一个按钮，可以手动增加 1 kcal，便于测试。  
 
