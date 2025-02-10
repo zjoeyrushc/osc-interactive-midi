@@ -5,6 +5,8 @@
 ## 1 简介
 本 Demo 以 macOS 为例，展示如何通过 OSC 协议，把摄像头数据、鼠标交互及健康数据（如心率和卡路里）传递到 DAW 实时生成 MIDI 声音（以 AbletonLive 为例）。项目中的代码仅为简易化的个人思路，除了数据获取，各创作者的关注点可放在如何映射合成器参数与音符编排上，从而拓展编曲与声音设计的新思路。
 
+🔗 **点击图片观看演示视频**
+
 [![演示视频](https://img.youtube.com/vi/pWezZ3rMoS0/maxresdefault.jpg)](https://youtu.be/pWezZ3rMoS0)
 
 
